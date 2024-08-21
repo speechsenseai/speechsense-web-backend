@@ -36,7 +36,7 @@ export class UserService {
   }
 
   public async createUser(user: SignUpDto & { loginType: LoginType }) {
-    return this.userRepository.save(user);
+    return serializeUser(await this.userRepository.save(user));
   }
 
   public async activateUser(id: string) {

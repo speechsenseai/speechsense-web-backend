@@ -84,12 +84,15 @@ export class AuthService {
 
         return { message: 'Refreshed succefully', tokens };
       }
+      return new BadRequestException('Bad refresh token');
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
         throw new BadRequestException('Email verification token expired');
       }
-
-      throw new BadRequestException('Bad verification token');
+      if (error?.name === 'JsonWebTokenError') {
+        throw new BadRequestException('Bad verification token');
+      }
+      throw error;
     }
   }
 
