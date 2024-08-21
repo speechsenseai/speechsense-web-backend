@@ -4,7 +4,9 @@ import { SignUpDto } from './dto/signup.dto';
 import { Public } from 'src/decorators/public';
 import { SignInDto } from './dto/signIn.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 @Public()
 export class AuthController {

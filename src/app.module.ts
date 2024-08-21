@@ -1,8 +1,6 @@
 import { RestaurantModule } from './modules/restaurant/restaurant.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'dotenv/config';
@@ -29,7 +27,5 @@ import { Recording } from './modules/recording/entities/recording.entity';
       entities: [User, Restaurant, Device, Recording],
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
