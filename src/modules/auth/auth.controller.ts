@@ -8,21 +8,21 @@ import { RefreshDto } from './dto/refresh.dto';
 @Controller('auth')
 @Public()
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-    @Post('signUp')
-    async signUp(@Body() signUpBody: SignUpDto) {
-        return this.authService.signUp(signUpBody);
-    }
+  @Post('signUp')
+  async signUp(@Body() signUpBody: SignUpDto) {
+    return this.authService.signUp(signUpBody);
+  }
 
-    @Post('signIn')
-    async signIn(@Body() signInBody: SignInDto) {
-        return this.authService.signIn(signInBody);
-    }
+  @Post('signIn')
+  async signIn(@Body() signInBody: SignInDto) {
+    return this.authService.signIn(signInBody);
+  }
 
-    @Public()
-    @Post('refresh')
-    async refresh(@Body() body: RefreshDto) {
-        return this.authService.refresh(body.refreshToken);
-    }
+  @Public()
+  @Post('refresh')
+  async refresh(@Body() body: RefreshDto) {
+    return this.authService.refresh(body.refreshToken);
+  }
 }

@@ -6,9 +6,9 @@ import { JwtService } from '@nestjs/jwt';
 import { UserModule } from '../users/user.module';
 
 @Module({
-    imports: [EmailModule, UserModule],
-    providers: [VerificationService, JwtService],
-    controllers: [VerificationController],
-    exports: [VerificationService],
+  imports: [EmailModule, UserModule],
+  providers: [VerificationService, JwtService],
+  controllers: [VerificationController],
+  exports: [VerificationService],
 })
 export class VerificationModule {}
