@@ -1,27 +1,22 @@
 import { Recording } from './../../recording/entities/recording.entity';
 import { BaseModel } from 'src/common/typeorm/BaseModel';
 import { Device } from 'src/modules/device/entities/device.entity';
-import { Restaurant } from 'src/modules/restaurant/entities/restaurant.entity';
+import { Location } from 'src/modules/location/entities/location.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-export enum LoginType {
-  EMAIL = 'email',
-  GOOGLE = 'google',
-}
 @Entity()
 export class User extends BaseModel {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ name: 'password', nullable: true })
   password: string;
 
-  @Column({
-    type: 'enum',
-    enum: LoginType,
-    nullable: true,
-  })
-  loginType: LoginType;
+  @Column({ default: false })
+  isEmail: boolean;
+
+  @Column({ default: false })
+  isGoogle: boolean;
 
   @Column({
     default: false,
@@ -33,12 +28,9 @@ export class User extends BaseModel {
   })
   isDeleted: boolean;
 
-  @OneToMany(() => Restaurant, (restaurant) => restaurant.user)
-  restaurants: Restaurant[];
+  @OneToMany(() => Location, (location) => location.user)
+  locations: Location[];
 
   @OneToMany(() => Device, (device) => device.user)
   devices: Device[];
-
-  @OneToMany(() => Recording, (recording) => recording.user)
-  recordings: Recording[];
 }

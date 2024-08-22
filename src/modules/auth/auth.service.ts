@@ -1,3 +1,4 @@
+import { GoogleClient } from './../../common/lib/google';
 import {
   BadRequestException,
   ConflictException,
@@ -8,9 +9,9 @@ import { UserService } from '../users/user.service';
 import { hash, compare } from 'bcrypt';
 import { VerificationService } from '../verification/verification.service';
 import { JwtService } from '@nestjs/jwt';
-import { LoginType } from '../users/entities/user.entity';
 import { SignInDto } from './dto/signIn.dto';
 import 'dotenv/config';
+import { GoogleDto } from './dto/google.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
     const user = await this.userService.createUser({
       ...body,
       password: hashPassword,
-      loginType: LoginType.EMAIL,
+      isEmail: true,
     });
     await this.verificationService.sendVerification(user.id, body.email);
     const tokens = await this.getTokens({
@@ -40,6 +41,7 @@ export class AuthService {
 
     return { message: 'Succefully registered', tokens };
   }
+
   public async signIn(body: SignInDto) {
     const user = await this.userService.findUserByEmail(body.email);
     if (!user) {
@@ -93,6 +95,38 @@ export class AuthService {
         throw new BadRequestException('Bad verification token');
       }
       throw error;
+    }
+  }
+
+  public async google(body: GoogleDto) {
+    const ticket = await GoogleClient.verifyIdToken({
+      idToken: body.credential,
+    });
+    const payload = ticket.getPayload();
+    const user = await this.userService.findUserByEmail(payload.email);
+
+    if (!user) {
+      const googleNewUser = await this.userService.createUser({
+        email: payload.email,
+        isGoogle: true,
+        password: null,
+        isVerified: true,
+      });
+      const tokens = await this.getTokens({
+        userId: googleNewUser.id,
+        email: googleNewUser.email,
+      });
+      return { message: 'Successfully signed in', tokens };
+    } else {
+      await this.userService.update(user.id, {
+        isVerified: true,
+        isGoogle: true,
+      });
+      const tokens = await this.getTokens({
+        userId: user.id,
+        email: user.email,
+      });
+      return { message: 'Successfully signed in', tokens };
     }
   }
 

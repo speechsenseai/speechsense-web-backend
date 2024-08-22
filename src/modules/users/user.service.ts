@@ -2,7 +2,7 @@ import { serializeUser } from './serializers/user.serialize';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LoginType, User } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { SignUpDto } from '../auth/dto/signup.dto';
 
@@ -13,16 +13,25 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
   public async getUsers() {
-    return this.userRepository.find();
+    return this.userRepository.find({
+      relations: {
+        locations: true,
+        devices: true,
+      },
+    });
   }
   public async findUserByEmail(email: string) {
-    return this.userRepository.findOneBy({
-      email,
+    return this.userRepository.findOne({
+      where: {
+        email,
+      },
     });
   }
   public async findUserById(id: string) {
-    return this.userRepository.findOneBy({
-      id,
+    return this.userRepository.findOne({
+      where: {
+        id,
+      },
     });
   }
 
@@ -35,7 +44,13 @@ export class UserService {
     return this.userRepository.save(updatedUser);
   }
 
-  public async createUser(user: SignUpDto & { loginType: LoginType }) {
+  public async createUser(
+    user: SignUpDto & {
+      isGoogle?: boolean;
+      isEmail?: boolean;
+      isVerified?: boolean;
+    },
+  ) {
     return serializeUser(await this.userRepository.save(user));
   }
 
