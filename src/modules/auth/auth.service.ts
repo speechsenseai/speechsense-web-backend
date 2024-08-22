@@ -99,34 +99,38 @@ export class AuthService {
   }
 
   public async google(body: GoogleDto) {
-    const ticket = await GoogleClient.verifyIdToken({
-      idToken: body.credential,
-    });
-    const payload = ticket.getPayload();
-    const user = await this.userService.findUserByEmail(payload.email);
+    try {
+      const ticket = await GoogleClient.verifyIdToken({
+        idToken: body.credential,
+      });
+      const payload = ticket.getPayload();
+      const user = await this.userService.findUserByEmail(payload.email);
 
-    if (!user) {
-      const googleNewUser = await this.userService.createUser({
-        email: payload.email,
-        isGoogle: true,
-        password: null,
-        isVerified: true,
-      });
-      const tokens = await this.getTokens({
-        userId: googleNewUser.id,
-        email: googleNewUser.email,
-      });
-      return { message: 'Successfully signed in', tokens };
-    } else {
-      await this.userService.update(user.id, {
-        isVerified: true,
-        isGoogle: true,
-      });
-      const tokens = await this.getTokens({
-        userId: user.id,
-        email: user.email,
-      });
-      return { message: 'Successfully signed in', tokens };
+      if (!user) {
+        const googleNewUser = await this.userService.createUser({
+          email: payload.email,
+          isGoogle: true,
+          password: null,
+          isVerified: true,
+        });
+        const tokens = await this.getTokens({
+          userId: googleNewUser.id,
+          email: googleNewUser.email,
+        });
+        return { message: 'Successfully signed in', tokens };
+      } else {
+        await this.userService.update(user.id, {
+          isVerified: true,
+          isGoogle: true,
+        });
+        const tokens = await this.getTokens({
+          userId: user.id,
+          email: user.email,
+        });
+        return { message: 'Successfully signed in', tokens };
+      }
+    } catch (error) {
+      console.log(error, 'error');
     }
   }
 

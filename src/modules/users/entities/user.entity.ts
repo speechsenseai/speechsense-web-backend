@@ -1,8 +1,6 @@
-import { Recording } from './../../recording/entities/recording.entity';
 import { BaseModel } from 'src/common/typeorm/BaseModel';
-import { Device } from 'src/modules/device/entities/device.entity';
 import { Location } from 'src/modules/location/entities/location.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity()
 export class User extends BaseModel {
@@ -28,9 +26,10 @@ export class User extends BaseModel {
   })
   isDeleted: boolean;
 
-  @OneToMany(() => Location, (location) => location.user)
-  locations: Location[];
+  @Column({ nullable: true })
+  country: string;
 
-  @OneToMany(() => Device, (device) => device.user)
-  devices: Device[];
+  @ManyToMany(() => Location)
+  @JoinTable()
+  locations: Location[];
 }

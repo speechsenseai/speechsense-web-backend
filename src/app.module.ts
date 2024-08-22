@@ -1,3 +1,5 @@
+import { RecordingModule } from './modules/recording/recording.module';
+import { DeviceModule } from './modules/device/device.module';
 import { LocationModule } from './modules/location/location.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { Module } from '@nestjs/common';
@@ -16,6 +18,8 @@ import { Recording } from './modules/recording/entities/recording.entity';
     UserModule,
     VerificationModule,
     LocationModule,
+    DeviceModule,
+    RecordingModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,

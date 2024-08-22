@@ -8,6 +8,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
   @Get('getUsers')
   async getUsers(@Req() req) {
-    return this.userService.getUsers();
+    return this.userService.getUsers(req.user.sub);
   }
 }
