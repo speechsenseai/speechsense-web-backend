@@ -17,11 +17,12 @@ export class JwtAccessStrategy extends PassportStrategy(
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validate(req: Request, payload: any) {
     const token =
-      typeof req?.headers['Authorization'] === 'string'
-        ? req?.headers['Authorization']
-        : (req?.headers['Authorization']?.[0] ?? '');
+      typeof req.headers['Authorization'] === 'string'
+        ? req.headers['Authorization']
+        : (req.headers['Authorization']?.[0] ?? '');
     const accessToken = token.replace('Bearer ', '').trim();
 
     return { ...payload, accessToken: accessToken };

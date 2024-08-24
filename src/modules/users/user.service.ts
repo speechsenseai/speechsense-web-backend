@@ -3,7 +3,7 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { SignUpDto } from '../auth/dto/signup.dto';
 import { Location } from '../location/entities/location.entity';
 
@@ -16,6 +16,8 @@ export class UserService {
     private readonly locationRepository: Repository<Location>,
   ) {}
   public async getUsers(userId: string) {
+    console.log(userId);
+
     const users = await this.userRepository.find({
       relations: {
         locations: true,
@@ -38,19 +40,47 @@ export class UserService {
 
     return users;
   }
-  public async findUserByEmail(email: string) {
-    return this.userRepository.findOne({
+  public async findUserByEmail(options: {
+    email: string;
+    relations?: FindOneOptions<User>['relations'];
+    serialize?: boolean;
+  }) {
+    const { relations, serialize = true, email } = options;
+
+    const user = await this.userRepository.findOne({
       where: {
         email,
       },
+      relations,
     });
+    if (serialize && user !== null) {
+      return serializeUser(user);
+    }
+    return user;
   }
-  public async findUserById(id: string) {
-    return this.userRepository.findOne({
+  public async findUserById(options: {
+    id: string;
+    relations?: FindOneOptions<User>['relations'];
+    serialize?: boolean;
+  }) {
+    const { relations, serialize = true, id } = options;
+
+    const user = await this.userRepository.findOne({
       where: {
         id,
       },
+      relations,
     });
+    if (serialize && user !== null) {
+      return serializeUser(user);
+    }
+    return user;
+  }
+  public async deleteUser(id: string) {
+    return this.userRepository.delete(id);
+  }
+  public async save(user: User) {
+    return this.userRepository.save(user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -63,21 +93,23 @@ export class UserService {
   }
 
   public async createUser(
-    user: SignUpDto & {
-      isGoogle?: boolean;
-      isEmail?: boolean;
-      isVerified?: boolean;
-    },
+    user: Partial<
+      SignUpDto & {
+        isGoogle: boolean;
+        isEmail: boolean;
+        isVerified: boolean;
+      }
+    >,
   ) {
     return serializeUser(await this.userRepository.save(user));
   }
 
   public async activateUser(id: string) {
-    const user = await this.findUserById(id);
-    if (user.isVerified) {
+    const user = await this.findUserById({ id });
+    if (user?.isVerified) {
       throw new BadRequestException('Email already verified');
     }
     const userUpdated = await this.update(id, { isVerified: true });
-    return serializeUser(userUpdated);
+    return userUpdated;
   }
 }

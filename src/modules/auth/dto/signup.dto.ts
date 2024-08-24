@@ -8,6 +8,11 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SignUpDto {
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @ApiProperty()
+  readonly name: string;
+
   @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty({ message: 'Email is required' })
   @ApiProperty()

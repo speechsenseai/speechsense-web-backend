@@ -4,11 +4,14 @@ import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity()
 export class User extends BaseModel {
+  @Column({ nullable: true })
+  name: string;
+
   @Column({ unique: true })
   email: string;
 
   @Column({ name: 'password', nullable: true })
-  password: string;
+  password?: string;
 
   @Column({ default: false })
   isEmail: boolean;
@@ -29,7 +32,7 @@ export class User extends BaseModel {
   @Column({ nullable: true })
   country: string;
 
-  @ManyToMany(() => Location)
+  @ManyToMany(() => Location, (location) => location.users)
   @JoinTable()
   locations: Location[];
 }

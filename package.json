@@ -12,7 +12,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix"
+    "lint": "eslint -c .eslintrc.js --ext .ts,.tsx .",
+    "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -26,7 +27,9 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.5",
+    "eslint-plugin-import": "^2.29.1",
     "google-auth-library": "^9.14.0",
+    "nestjs-paginate": "^9.0.1",
     "nodemailer": "^6.9.14",
     "passport-jwt": "^4.0.1",
     "pg": "^8.12.0",

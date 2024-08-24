@@ -3,7 +3,7 @@ import { BaseModel } from 'src/common/typeorm/BaseModel';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Recording } from 'src/modules/recording/entities/recording.entity';
 
-enum DeviceType {
+export enum DeviceType {
   Andriod = 'android',
   RasberryPi = 'rasberryPi',
   Web = 'web',

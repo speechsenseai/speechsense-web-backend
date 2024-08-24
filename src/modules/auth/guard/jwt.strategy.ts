@@ -17,10 +17,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload) {
     const user = await this.usersService.findUserById(payload.sub);
 
-    if (user?.isVerified === false) {
+    if (!user?.isVerified) {
       throw new UnauthorizedException('User not verified');
     }
-    if (!user || user.isDeleted === true) {
+    if (!user || user.isDeleted) {
       throw new UnauthorizedException('User not found');
     }
     return payload;
