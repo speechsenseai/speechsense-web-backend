@@ -15,11 +15,11 @@ export class LocationController {
 
   @Get(':locationId')
   getOneLocation(@Req() req, @Param('locationId') locationId: string) {
-    return this.locationService.getOneLocation(req.user.sub, locationId);
+    return this.locationService.getOneLocation(req.user.user, locationId);
   }
 
   @Post()
   createLocation(@Req() req, @Body() body: CreateLocationDto) {
-    return this.locationService.createLocation(req.user.sub, body);
+    return this.locationService.createLocation(req.user, body);
   }
 }

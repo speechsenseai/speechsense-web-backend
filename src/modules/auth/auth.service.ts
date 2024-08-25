@@ -37,6 +37,7 @@ export class AuthService {
       password: hashPassword,
       isEmail: true,
     });
+    await this.userService.createDefaultLocationDevice(user);
     try {
       await this.verificationService.sendVerification(user.id, body.email);
     } catch {

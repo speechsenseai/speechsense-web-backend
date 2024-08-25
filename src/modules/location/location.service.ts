@@ -5,14 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Device } from '../device/entities/device.entity';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { CreateLocationDto } from './dto/CreateLocation.dto';
-import { UserService } from '../users/user.service';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class LocationService {
   constructor(
     @InjectRepository(Location)
     private readonly locationRepository: Repository<Location>,
-    private readonly userService: UserService,
   ) {}
   public async getLocations(userId: string, query: PaginateQuery) {
     return paginate(query, this.locationRepository, {
@@ -29,18 +28,17 @@ export class LocationService {
       },
     });
   }
-  public async getOneLocation(userId: string, locationId: string) {
+  public async getOneLocation(user: User, locationId: string) {
     return this.locationRepository.findOne({
       where: {
         id: locationId,
         users: {
-          id: userId,
+          id: user.id,
         },
       },
     });
   }
-  public async createLocation(userId: string, body: CreateLocationDto) {
-    const user = await this.userService.findUserById({ id: userId });
+  public async createLocation(user: User, body: CreateLocationDto) {
     if (!user) {
       throw new BadRequestException('User not found');
     }

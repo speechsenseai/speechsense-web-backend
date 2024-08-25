@@ -3,8 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import { EmailService } from '../email/email.service';
 import { UserService } from '../users/user.service';
 import { VerifyEmailDto } from './dto/verifyEmail.dto';
-import { DeviceService } from '../device/device.service';
-import { LocationService } from '../location/location.service';
 
 @Injectable()
 export class VerificationService {
@@ -12,8 +10,6 @@ export class VerificationService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly userService: UserService,
-    private readonly deviceService: DeviceService,
-    private readonly locationService: LocationService,
   ) {}
   public sendVerification(userId: string, email: string) {
     const token = this.jwtService.sign(
@@ -34,14 +30,6 @@ export class VerificationService {
       });
       if (typeof payload === 'object' && 'sub' in payload) {
         const user = await this.userService.activateUser(payload.sub);
-        if (!user.locations) {
-          const device = await this.deviceService.createDefaultDevice();
-          const location =
-            await this.locationService.createDefaultLocation(device);
-
-          user.locations = [location];
-        }
-        await this.userService.save(user);
         return user;
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

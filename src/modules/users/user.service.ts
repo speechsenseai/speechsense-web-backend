@@ -1,3 +1,5 @@
+import { DeviceService } from '../device/device.service';
+import { LocationService } from '../location/location.service';
 import { serializeUser } from './serializers/user.serialize';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { BadRequestException, Injectable } from '@nestjs/common';
@@ -5,15 +7,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { SignUpDto } from '../auth/dto/signup.dto';
-import { Location } from '../location/entities/location.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Location)
-    private readonly locationRepository: Repository<Location>,
+    private readonly locationService: LocationService,
+    private readonly deviceService: DeviceService,
   ) {}
   public async getUsers(userId: string) {
     console.log(userId);
@@ -111,5 +112,15 @@ export class UserService {
     }
     const userUpdated = await this.update(id, { isVerified: true });
     return userUpdated;
+  }
+
+  public async createDefaultLocationDevice(user: User) {
+    if (!user.locations) {
+      const device = await this.deviceService.createDefaultDevice();
+      const location = await this.locationService.createDefaultLocation(device);
+      user.locations = [location];
+      await this.save(user);
+    }
+    return user;
   }
 }
