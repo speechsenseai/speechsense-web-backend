@@ -58,6 +58,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: '22'
           script: |
+            cat .env
             cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
             npm install && npm run build
             npm start
