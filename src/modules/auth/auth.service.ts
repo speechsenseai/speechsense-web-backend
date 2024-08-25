@@ -37,13 +37,13 @@ export class AuthService {
       password: hashPassword,
       isEmail: true,
     });
-    await this.userService.createDefaultLocationDevice(user);
     try {
       await this.verificationService.sendVerification(user.id, body.email);
     } catch {
       await this.userService.deleteUser(user.id);
-      return new InternalServerErrorException('Error sending email');
+      throw new InternalServerErrorException('Error sending email');
     }
+    await this.userService.createDefaultLocationDevice(user);
     const tokens = await this.getTokens({
       userId: user.id,
       email: user.email,

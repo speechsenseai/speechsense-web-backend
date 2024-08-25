@@ -20,7 +20,6 @@ export class VerificationService {
       },
     );
     const url = `${process.env.CLIENT_URL}${process.env.CLIENT_VERIFICATION_ROUTE}?token=${token}`;
-
     return this.emailService.sendVerificationEmail({ email, url });
   }
   public async verifyEmail(body: VerifyEmailDto) {
