@@ -18,16 +18,9 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Syncs file to ec2
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          local_path: './.'
-          remote_path: '/home/${{ secrets.SSH_USER }}/deployment/speechsense'
-          sftpArgs: '-o ConnectTimeout=5'
-          delete_remote_files: true
+      - name: Sync files to EC2
+        run: |
+          rsync -avz --exclude '.git' -e "ssh -o StrictHostKeyChecking=no" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/deployment/speechsense
       - name: 'Create env file'
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -63,7 +56,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: '22'
           script: |
-            cat .env
             cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
             npm install && npm run build
             npm start
