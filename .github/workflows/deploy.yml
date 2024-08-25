@@ -20,7 +20,7 @@ jobs:
 
       - name: Sync files to EC2
         run: |
-          rsync -avz --exclude '.git' -e "ssh -o StrictHostKeyChecking=no" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/deployment/speechsense
+          rsync -avz --exclude '.git' -e "ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o StrictHostKeyChecking=no" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/deployment/speechsense
       - name: 'Create env file'
         uses: appleboy/ssh-action@v1.0.0
         with:
