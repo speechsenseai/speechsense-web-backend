@@ -18,27 +18,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 'Create env file'
-        run: |
-          touch .env
-          echo NODE_ENV=${{ secrets.NODE_ENV }} >> .env
-          echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-          echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-          echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
-          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
-          echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
-          echo ACCESS_TOKEN_DURATION=${{ secrets.ACCESS_TOKEN_DURATION }} >> .env
-          echo REFRESH_TOKEN_DURATION=${{ secrets.REFRESH_TOKEN_DURATION }} >> .env
-          echo EMAIL_TOKEN_DURATION=${{ secrets.EMAIL_TOKEN_DURATION }} >> .env
-          echo CLIENT_URL=${{ secrets.CLIENT_URL }} >> .env
-          echo CLIENT_VERIFICATION_ROUTE=${{ secrets.CLIENT_VERIFICATION_ROUTE }} >> .env
-          echo SALT_ROUNDS=${{ secrets.SALT_ROUNDS }} >> .env
-          echo EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }} >> .env
-          echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> .env
-          echo EMAIL_USER=${{ secrets.EMAIL_USER }} >> .env
-          echo EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} >> .env
-
       - name: Syncs file to ec2
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
@@ -49,7 +28,33 @@ jobs:
           remote_path: '/home/${{ secrets.SSH_USER }}/deployment/speechsense'
           sftpArgs: '-o ConnectTimeout=5'
           delete_remote_files: true
-
+      - name: 'Create env file'
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: '22'
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
+            touch .env
+            echo NODE_ENV=${{ secrets.NODE_ENV }} >> .env
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+            echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
+            echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+            echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+            echo ACCESS_TOKEN_DURATION=${{ secrets.ACCESS_TOKEN_DURATION }} >> .env
+            echo REFRESH_TOKEN_DURATION=${{ secrets.REFRESH_TOKEN_DURATION }} >> .env
+            echo EMAIL_TOKEN_DURATION=${{ secrets.EMAIL_TOKEN_DURATION }} >> .env
+            echo CLIENT_URL=${{ secrets.CLIENT_URL }} >> .env
+            echo CLIENT_VERIFICATION_ROUTE=${{ secrets.CLIENT_VERIFICATION_ROUTE }} >> .env
+            echo SALT_ROUNDS=${{ secrets.SALT_ROUNDS }} >> .env
+            echo EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }} >> .env
+            echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> .env
+            echo EMAIL_USER=${{ secrets.EMAIL_USER }} >> .env
+            echo EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} >> .env
       - name: Run application
         uses: appleboy/ssh-action@v1.0.0
         with:
