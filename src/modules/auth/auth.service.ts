@@ -13,6 +13,7 @@ import { SignInDto } from './dto/signIn.dto';
 import 'dotenv/config';
 import { GoogleDto } from './dto/google.dto';
 import { User } from '../users/entities/user.entity';
+import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly verificationService: VerificationService,
     private readonly jwtService: JwtService,
+    private readonly awsS3Service: AwsS3Service,
   ) {}
   public async signUp(body: SignUpDto) {
     const isExist = await this.userService.findUserByEmail({
@@ -44,6 +46,7 @@ export class AuthService {
       throw new InternalServerErrorException('Error sending email');
     }
     await this.userService.createDefaultLocationDevice(user);
+
     const tokens = await this.getTokens({
       userId: user.id,
       email: user.email,

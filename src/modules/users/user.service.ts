@@ -2,11 +2,16 @@ import { DeviceService } from '../device/device.service';
 import { LocationService } from '../location/location.service';
 import { serializeUser } from './serializers/user.serialize';
 import { UpdateUserDto } from './dto/updateUser.dto';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { SignUpDto } from '../auth/dto/signup.dto';
+import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
 
 @Injectable()
 export class UserService {
@@ -15,6 +20,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     private readonly locationService: LocationService,
     private readonly deviceService: DeviceService,
+    private readonly awsS3Service: AwsS3Service,
   ) {}
   public async getUsers(userId: string) {
     console.log(userId);
@@ -117,9 +123,27 @@ export class UserService {
     if (!user.locations) {
       const device = await this.deviceService.createDefaultDevice();
       const location = await this.locationService.createDefaultLocation(device);
+      await this.createFolderS3(user, location.id, device.id);
       user.locations = [location];
       await this.save(user);
     }
     return user;
+  }
+  public async createFolderS3(
+    user: User,
+    locationId: string,
+    deviceId: string,
+  ) {
+    try {
+      const path = `/${user.id}/${locationId}/${deviceId}`;
+      await this.awsS3Service.createFolder({ path });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      await this.deleteUser(user.id);
+      throw new InternalServerErrorException(
+        'Error creating folder s3',
+        error?.name,
+      );
+    }
   }
 }

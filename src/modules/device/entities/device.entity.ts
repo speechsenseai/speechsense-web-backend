@@ -5,12 +5,16 @@ import { Recording } from 'src/modules/recording/entities/recording.entity';
 
 export enum DeviceType {
   Andriod = 'android',
-  RasberryPi = 'rasberryPi',
+  RaspberryPi = 'raspberryPi',
   Web = 'web',
 }
 @Entity()
 export class Device extends BaseModel {
+  @Column({ nullable: true })
+  name: string;
+
   @Column({
+    name: 'type',
     type: 'enum',
     enum: DeviceType,
   })

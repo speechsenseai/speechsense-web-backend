@@ -20,6 +20,6 @@ export class LocationController {
 
   @Post()
   createLocation(@Req() req, @Body() body: CreateLocationDto) {
-    return this.locationService.createLocation(req.user, body);
+    return this.locationService.createLocation(req.user.user, body);
   }
 }

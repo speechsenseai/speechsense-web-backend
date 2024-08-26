@@ -5,6 +5,7 @@ import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Recording } from './entities/recording.entity';
 import { Repository } from 'typeorm';
+import { paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class RecordingService {
@@ -26,17 +27,40 @@ export class RecordingService {
     if (!device?.location.id) {
       throw new BadRequestException('Location not found');
     }
-    const path = `${user.id}/${device?.location.id}/${device?.id}`;
-
+    const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
     const res = await this.awsS3Servie.uploadMp3File({
       fileBuffer: file.buffer,
       path: path,
       fileName: file.originalname,
     });
+
     const recording = this.recordingRepository.create({
-      recordingS3Link: res.Location,
+      recordingS3Link: res.url,
     });
     recording.device = device;
     return await this.recordingRepository.save(recording);
+  }
+
+  public async getRecordings(
+    userId: string,
+    deviceId: string,
+    query: PaginateQuery,
+  ) {
+    return paginate(query, this.recordingRepository, {
+      sortableColumns: ['createdAt'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      maxLimit: 10,
+      defaultLimit: 10,
+      where: {
+        device: {
+          id: deviceId,
+          location: {
+            users: {
+              id: userId,
+            },
+          },
+        },
+      },
+    });
   }
 }
