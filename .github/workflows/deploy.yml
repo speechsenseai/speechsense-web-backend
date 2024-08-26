@@ -71,4 +71,4 @@ jobs:
             cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
             npm install && npm run build
             cp /home/${{ secrets.SSH_USER }}/deployment/ecosystem.config.js /home/${{ secrets.SSH_USER }}/deployment/speechsense/ecosystem.config.js
-            pm2 restart ./ecosystem.config.js
+            sudo pm2 restart ./ecosystem.config.js

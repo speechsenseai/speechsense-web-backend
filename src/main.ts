@@ -12,7 +12,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('Speechsense Web Backend API')
+    .setTitle('Speechsense Web-Backend API')
     .setDescription('The Speechsense Web Backend API description')
     .setVersion('1.0')
     .build();
