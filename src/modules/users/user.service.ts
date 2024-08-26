@@ -18,7 +18,6 @@ export class UserService {
   ) {}
   public async getUsers(userId: string) {
     console.log(userId);
-
     const users = await this.userRepository.find({
       relations: {
         locations: true,

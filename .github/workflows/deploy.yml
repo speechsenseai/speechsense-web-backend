@@ -54,6 +54,10 @@ jobs:
             echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> .env
             echo EMAIL_USER=${{ secrets.EMAIL_USER }} >> .env
             echo EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} >> .env
+            echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> .env
+            echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
+            echo AWS_PUBLIC_BUCKET_NAME=${{ secrets.AWS_PUBLIC_BUCKET_NAME }} >> .env
+            echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
       - name: Run application
         uses: appleboy/ssh-action@v1.0.0
         with:
