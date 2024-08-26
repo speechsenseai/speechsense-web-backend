@@ -69,8 +69,6 @@ jobs:
             cd /home/${{ secrets.SSH_USER }}/deployment/
             sudo rm -rf speechsense
             sudo mv speechsense-temp speechsense
-            chmod -R 755 /speechsense
-            chown -R www-data:www-data /speechsense
             sudo rm -rf speechsense-temp
             cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
             npm install && npm run build
