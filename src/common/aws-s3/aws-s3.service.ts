@@ -8,14 +8,11 @@ export class AwsS3Service {
 
   async uploadMp3File(options: {
     fileBuffer: Buffer;
-    userUUID: string;
-    locationUUID: string;
-    deviceUUID: string;
+    path: string;
     fileName: string;
   }): Promise<AWS.S3.ManagedUpload.SendData> {
-    const { fileBuffer, userUUID, locationUUID, deviceUUID, fileName } =
-      options;
-    const key = `${userUUID}/${locationUUID}/${deviceUUID}/${fileName}`;
+    const { fileBuffer, path, fileName } = options;
+    const key = `${path.startsWith('/') ? '' : '/'}${path}${path.endsWith('/' ? '' : '/')}${fileName}`;
 
     const params = {
       Bucket: process.env.AWS_PUBLIC_BUCKET_NAME!,

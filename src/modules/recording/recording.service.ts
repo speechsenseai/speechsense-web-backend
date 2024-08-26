@@ -26,12 +26,11 @@ export class RecordingService {
     if (!device?.location.id) {
       throw new BadRequestException('Location not found');
     }
+    const path = `${user.id}/${device?.location.id}/${device?.id}`;
 
     const res = await this.awsS3Servie.uploadMp3File({
       fileBuffer: file.buffer,
-      userUUID: user.id,
-      locationUUID: device?.location.id,
-      deviceUUID: device?.id,
+      path: path,
       fileName: file.originalname,
     });
     const recording = this.recordingRepository.create({
