@@ -25,9 +25,25 @@ export class EmailService {
       body,
     );
     return this.nodemailerTransport.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `Speechsense AI Notification <${process.env.EMAIL_USER}>`,
       to: body.email,
       subject: 'Verify your email',
+      html,
+    });
+  }
+  sendResetPasswordEmail(body: {
+    email: string;
+    url: string;
+    name: string | null;
+  }) {
+    const html = this.parseHtmlTemplate('src/assets/resetPassword.html', {
+      ...body,
+      name: body.name || body.email,
+    });
+    return this.nodemailerTransport.sendMail({
+      from: `Speechsense AI Notification <${process.env.EMAIL_USER}>`,
+      to: body.email,
+      subject: 'Reset your password',
       html,
     });
   }

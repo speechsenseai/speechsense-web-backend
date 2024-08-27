@@ -31,10 +31,13 @@ import { ProfileModule } from './modules/profile/profile.module';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV === 'development' ? true : false,
       entities: [User, Location, Device, Recording],
-      ssl: {
-        rejectUnauthorized:
-          process.env.NODE_ENV === 'development' ? undefined : false,
-      },
+      ...(process.env.NODE_ENV === 'development'
+        ? {}
+        : {
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          }),
     }),
   ],
 })

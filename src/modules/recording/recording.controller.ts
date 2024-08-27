@@ -15,7 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 
 const MAX_FILE_SIZE = 1000000000;
-@ApiTags('Recorgings')
+@ApiTags('Recordings')
 @Controller('recordings')
 export class RecordingController {
   constructor(private readonly recordingService: RecordingService) {}

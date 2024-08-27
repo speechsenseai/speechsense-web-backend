@@ -8,13 +8,11 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UserModule } from '../users/user.module';
 import { VerificationModule } from '../verification/verification.module';
 import { APP_GUARD } from '@nestjs/core';
-import { AwsS3Module } from 'src/common/aws-s3/aws-s3.module';
 
 @Module({
   imports: [
     UserModule,
     VerificationModule,
-    AwsS3Module,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,

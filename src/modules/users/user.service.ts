@@ -22,30 +22,6 @@ export class UserService {
     private readonly deviceService: DeviceService,
     private readonly awsS3Service: AwsS3Service,
   ) {}
-  public async getUsers(userId: string) {
-    console.log(userId);
-    const users = await this.userRepository.find({
-      relations: {
-        locations: true,
-      },
-    });
-    // const location = await this.locationRepository.save({
-    //   name: 'location',
-    //   address: 'address',
-    //   workingHours: 'workingHours',
-    //   workingDays: 'workingDays',
-    //   description: 'description',
-    // });
-    // users.forEach((user) => {
-    //   if (!user.locations) {
-    //     user.locations = [];
-    //   }
-    //   user.locations.push(location);
-    // });
-    // await this.userRepository.save(users);
-
-    return users;
-  }
   public async findUserByEmail(options: {
     email: string;
     relations?: FindOneOptions<User>['relations'];
