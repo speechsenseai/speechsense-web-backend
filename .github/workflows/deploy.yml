@@ -50,6 +50,7 @@ jobs:
             echo CLIENT_URL=${{ secrets.CLIENT_URL }} >> .env
             echo CLIENT_VERIFICATION_ROUTE=${{ secrets.CLIENT_VERIFICATION_ROUTE }} >> .env
             echo CLIENT_RESET_PASSWORD_ROUTE=${{ secrets.CLIENT_RESET_PASSWORD_ROUTE }} >> .env
+            echo AUDIO_METRICS_BACKEND_URL=${{ secrets.AUDIO_METRICS_BACKEND_URL }} >> .env
             echo SALT_ROUNDS=${{ secrets.SALT_ROUNDS }} >> .env
             echo EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }} >> .env
             echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> .env
