@@ -12,6 +12,7 @@ import { Location } from './modules/location/entities/location.entity';
 import { Device } from './modules/device/entities/device.entity';
 import { Recording } from './modules/recording/entities/recording.entity';
 import { ProfileModule } from './modules/profile/profile.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ProfileModule } from './modules/profile/profile.module';
     DeviceModule,
     RecordingModule,
     ProfileModule,
+    MetricsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
