@@ -14,26 +14,22 @@ export class MetricsService {
   async getNumericMetrics(user: User) {
     try {
       const res = await this.requester.post('/numeric_metrics', {
-        user_id: 'd515f640-e9d3-49fb-ad48-0c3985cbfb50',
+        user_id: user.id,
       });
       return res.data;
     } catch (error) {
       if (isAxiosError(error)) {
-        console.log(error, 'axios');
-
         throw new InternalServerErrorException(error.response?.data);
       }
-      console.log(error, 'error');
-
       throw error;
     }
   }
   async getInsightMetrics(user: User) {
     try {
       const res = await this.requester.post('/insights', {
-        user_id: 'd515f640-e9d3-49fb-ad48-0c3985cbfb50',
-        min_tstamp: '2024-01-29T09:50:08.973Z',
-        max_tstamp: '2024-08-29T09:50:08.973Z',
+        user_id: user.id,
+        min_tstamp: '2020-01-29T09:50:08.973Z', //FIX_ME
+        max_tstamp: new Date().toISOString(),
       });
       return res.data;
     } catch (error) {
