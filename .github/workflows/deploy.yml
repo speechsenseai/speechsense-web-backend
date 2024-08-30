@@ -27,6 +27,7 @@ jobs:
           local_path: './.'
           remote_path: '/home/${{ secrets.SSH_USER }}/deployment/speechsense-temp'
           sftpArgs: '-o ConnectTimeout=5'
+          delete_remote_files: true
       - name: 'Create env file'
         uses: appleboy/ssh-action@v1.0.0
         with:
