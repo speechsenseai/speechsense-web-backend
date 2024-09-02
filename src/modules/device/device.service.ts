@@ -11,6 +11,8 @@ import { CreateDeviceDto } from './dto/CreateDevice.dto';
 import { User } from '../users/entities/user.entity';
 import { LocationService } from '../location/location.service';
 import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
+import { ConnectDeviceDto } from './dto/ConnectDevice.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class DeviceService {
@@ -19,6 +21,7 @@ export class DeviceService {
     private readonly deviceRepository: Repository<Device>,
     private readonly locationService: LocationService,
     private readonly awsS3Service: AwsS3Service,
+    private readonly jwtService: JwtService,
   ) {}
   public async getDevices(
     userId: string,
@@ -81,6 +84,21 @@ export class DeviceService {
       relations,
     });
     return user;
+  }
+
+  public async connectDevice(body: ConnectDeviceDto) {
+    const token = await this.jwtService.signAsync(
+      {
+        uId: body.userId,
+        lId: body.locationId,
+        dId: body.deviceId,
+        isDevice: true,
+      },
+      {
+        secret: process.env.JWT_DEVICE_SECRET,
+      },
+    );
+    return { token };
   }
 
   public async createDeviceFolderS3(options: {

@@ -1,7 +1,11 @@
 import { UserService } from '../../users/user.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import 'dotenv/config';
 
 @Injectable()
@@ -15,10 +19,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload) {
+    if (payload.isDevice || !payload.sub) {
+      throw new ForbiddenException();
+    }
     const user = await this.usersService.findUserById({
       id: payload.sub,
       serialize: false,
     });
+
     if (!user || user.isDeleted) {
       throw new UnauthorizedException('User not found');
     }

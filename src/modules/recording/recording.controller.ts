@@ -13,8 +13,9 @@ import {
 import { RecordingService } from './recording.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
+import { ForDevice } from 'src/decorators/forDevice';
 
-const MAX_FILE_SIZE = 1000000000;
+const MAX_FILE_SIZE = 10000000000;
 @ApiTags('Recordings')
 @Controller('recordings')
 export class RecordingController {
@@ -37,7 +38,7 @@ export class RecordingController {
         validators: [
           new MaxFileSizeValidator({
             maxSize: MAX_FILE_SIZE,
-            message: 'File is too large. Max file size is 1gb',
+            message: 'File is too large',
           }),
         ],
         fileIsRequired: true,
@@ -46,5 +47,30 @@ export class RecordingController {
     record: Express.Multer.File,
   ) {
     return this.recordingService.uploadAudio(req.user.user, deviceId, record);
+  }
+
+  @Post('upload-audio-device')
+  @ForDevice()
+  @UseInterceptors(FileInterceptor('record'))
+  uploadAudioDevice(
+    @Req() req,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: MAX_FILE_SIZE,
+            message: 'File is too large',
+          }),
+        ],
+        fileIsRequired: true,
+      }),
+    )
+    record: Express.Multer.File,
+  ) {
+    return this.recordingService.uploadAudio(
+      req.user.device.user,
+      req.user.device.device.id,
+      record,
+    );
   }
 }
