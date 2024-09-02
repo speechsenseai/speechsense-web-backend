@@ -38,7 +38,12 @@ export class RecordingService {
       path: path,
       fileName: filename,
     });
-    if (!res.url.includes(filename)) {
+    const foundRecording = await this.recordingRepository.findOne({
+      where: {
+        recordingS3Link: res.url,
+      },
+    });
+    if (!foundRecording) {
       const recording = this.recordingRepository.create({
         recordingS3Link: res.url,
       });
@@ -55,11 +60,7 @@ export class RecordingService {
       });
       return recordingSaved;
     }
-    return this.recordingRepository.findOne({
-      where: {
-        recordingS3Link: res.url,
-      },
-    });
+    return foundRecording;
   }
 
   public async getRecordings(
