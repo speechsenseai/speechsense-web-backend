@@ -6,12 +6,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Recording } from './entities/recording.entity';
 import { Repository } from 'typeorm';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
+import { RabbitMqService } from 'src/common/rabbitmq/rabbitmq.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class RecordingService {
   constructor(
     private readonly deviceService: DeviceService,
     private readonly awsS3Servie: AwsS3Service,
+    private readonly rabbitMqService: RabbitMqService,
     @InjectRepository(Recording)
     private readonly recordingRepository: Repository<Recording>,
   ) {}
@@ -28,17 +31,35 @@ export class RecordingService {
       throw new BadRequestException('Location not found');
     }
     const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
+    const filenameSplit = file.originalname.split('.');
+    const filename = `${filenameSplit[0]}-${uuidv4()}.${filenameSplit[1]}`;
     const res = await this.awsS3Servie.uploadMp3File({
       fileBuffer: file.buffer,
       path: path,
-      fileName: file.originalname,
+      fileName: filename,
     });
-
-    const recording = this.recordingRepository.create({
-      recordingS3Link: res.url,
+    if (!res.url.includes(filename)) {
+      const recording = this.recordingRepository.create({
+        recordingS3Link: res.url,
+      });
+      recording.device = device;
+      const recordingSaved = await this.recordingRepository.save(recording);
+      await this.rabbitMqService.sendMessage({
+        body: JSON.stringify({
+          record_id: filename,
+          record_tstamp: recordingSaved.createdAt,
+          user_id: user.id,
+          device_id: device.id,
+          location_id: device.location.id,
+        }),
+      });
+      return recordingSaved;
+    }
+    return this.recordingRepository.findOne({
+      where: {
+        recordingS3Link: res.url,
+      },
     });
-    recording.device = device;
-    return await this.recordingRepository.save(recording);
   }
 
   public async getRecordings(

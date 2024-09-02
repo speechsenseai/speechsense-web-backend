@@ -5,9 +5,15 @@ import { DeviceModule } from '../device/device.module';
 import { AwsS3Module } from 'src/common/aws-s3/aws-s3.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Recording } from './entities/recording.entity';
+import { RabbitMqModule } from 'src/common/rabbitmq/rabbitmq.module';
 
 @Module({
-  imports: [DeviceModule, AwsS3Module, TypeOrmModule.forFeature([Recording])],
+  imports: [
+    DeviceModule,
+    AwsS3Module,
+    TypeOrmModule.forFeature([Recording]),
+    RabbitMqModule,
+  ],
   controllers: [RecordingController],
   providers: [RecordingService],
   exports: [RecordingService],

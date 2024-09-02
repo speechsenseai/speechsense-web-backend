@@ -43,12 +43,15 @@ export class UserService {
   public async findUserById(options: {
     id: string;
     relations?: FindOneOptions<User>['relations'];
+    where?: FindOneOptions<User>['where'];
+
     serialize?: boolean;
   }) {
-    const { relations, serialize = true, id } = options;
+    const { relations, serialize = true, id, where } = options;
 
     const user = await this.userRepository.findOne({
       where: {
+        ...where,
         id,
       },
       relations,

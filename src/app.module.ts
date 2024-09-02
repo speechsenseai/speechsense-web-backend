@@ -13,6 +13,8 @@ import { Device } from './modules/device/entities/device.entity';
 import { Recording } from './modules/recording/entities/recording.entity';
 import { ProfileModule } from './modules/profile/profile.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
+import { RabbitMqModule } from './common/rabbitmq/rabbitmq.module';
+import { DeviceStrategy } from './modules/device/guard/device.strategy';
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { MetricsModule } from './modules/metrics/metrics.module';
     RecordingModule,
     ProfileModule,
     MetricsModule,
+    RabbitMqModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -42,5 +45,6 @@ import { MetricsModule } from './modules/metrics/metrics.module';
           }),
     }),
   ],
+  providers: [DeviceStrategy],
 })
 export class AppModule {}

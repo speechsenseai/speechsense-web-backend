@@ -28,7 +28,7 @@ export class AwsS3Service {
     fileName: string;
   }) {
     const { fileBuffer, path, fileName } = options;
-    const key = `${path.startsWith('/') ? '' : '/'}${path}${path.endsWith('/' ? '' : '/')}${fileName}`;
+    const key = `${path.startsWith('/') ? '' : '/'}${path}${path.endsWith('/') ? '' : '/'}${fileName}`;
 
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
@@ -41,7 +41,7 @@ export class AwsS3Service {
     });
     await this.s3.send(command);
     return {
-      url: (await this.getFileUrl(key)).url,
+      url: this.getFileUrl(key).url,
       key,
     };
   }
@@ -62,7 +62,7 @@ export class AwsS3Service {
     };
   }
 
-  async getFileUrl(key: string) {
+  getFileUrl(key: string) {
     return {
       url: `https://${this.bucketName}.s3.amazonaws.com/${key}`,
     };
