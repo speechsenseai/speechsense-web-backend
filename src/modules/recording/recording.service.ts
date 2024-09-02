@@ -32,7 +32,8 @@ export class RecordingService {
     }
     const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
     const filenameSplit = file.originalname.split('.');
-    const filename = `${filenameSplit[0]}-${uuidv4()}.${filenameSplit[1]}`;
+    const filenameBase = `${filenameSplit[0]}-${uuidv4()}`;
+    const filename = `${filenameBase}.${filenameSplit[1]}`;
     const res = await this.awsS3Servie.uploadMp3File({
       fileBuffer: file.buffer,
       path: path,
@@ -51,7 +52,7 @@ export class RecordingService {
       const recordingSaved = await this.recordingRepository.save(recording);
       await this.rabbitMqService.sendMessage({
         body: JSON.stringify({
-          record_id: filename,
+          record_id: filenameBase,
           record_tstamp: recordingSaved.createdAt,
           user_id: user.id,
           device_id: device.id,
