@@ -6,7 +6,6 @@ import { Device } from './entities/device.entity';
 import { LocationModule } from '../location/location.module';
 import { AwsS3Module } from 'src/common/aws-s3/aws-s3.module';
 import { JwtModule } from '@nestjs/jwt';
-import { DeviceGuard } from './guard/device.guard';
 
 @Module({
   imports: [
@@ -16,7 +15,7 @@ import { DeviceGuard } from './guard/device.guard';
     JwtModule,
   ],
   controllers: [DeviceController],
-  providers: [DeviceService, DeviceGuard],
+  providers: [DeviceService],
   exports: [DeviceService],
 })
 export class DeviceModule {}

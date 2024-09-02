@@ -62,6 +62,11 @@ jobs:
             echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
             echo AWS_PUBLIC_BUCKET_NAME=${{ secrets.AWS_PUBLIC_BUCKET_NAME }} >> .env
             echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+            echo RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }} >> .env
+            echo RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }} >> .env
+            echo RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }} >> .env
+            echo RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }} >> .env
+            echo RABBITMQ_EXCHANGE_NAME=${{ secrets.RABBITMQ_EXCHANGE_NAME }} >> .env
       - name: Run application
         uses: appleboy/ssh-action@v1.0.0
         with:
