@@ -8,6 +8,10 @@ import { Repository } from 'typeorm';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { RabbitMqService } from 'src/common/rabbitmq/rabbitmq.service';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  extractFilenameWithoutExtension,
+  sanitazeFilname,
+} from 'src/common/lib/sanitazeFilename';
 
 @Injectable()
 export class RecordingService {
@@ -31,9 +35,8 @@ export class RecordingService {
       throw new BadRequestException('Location not found');
     }
     const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
-    const filenameSplit = file.originalname.split('.');
-    const filenameBase = `${filenameSplit[0]}-${uuidv4()}`;
-    const filename = `${filenameBase}.${filenameSplit[1]}`;
+    const filename = sanitazeFilname(file.originalname, uuidv4());
+
     const res = await this.awsS3Servie.uploadMp3File({
       fileBuffer: file.buffer,
       path: path,
@@ -52,7 +55,7 @@ export class RecordingService {
       const recordingSaved = await this.recordingRepository.save(recording);
       await this.rabbitMqService.sendMessage({
         body: JSON.stringify({
-          record_id: filenameBase,
+          record_id: extractFilenameWithoutExtension(filename),
           record_tstamp: recordingSaved.createdAt,
           user_id: user.id,
           device_id: device.id,
