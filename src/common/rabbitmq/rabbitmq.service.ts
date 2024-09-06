@@ -1,4 +1,8 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { connect, Connection, Channel } from 'amqplib';
 
@@ -12,6 +16,13 @@ export class RabbitMqService implements OnModuleInit {
   );
   // private readonly queueName = `records_web_backend_queue_${uuidv4()}`; FIX_ME now it isn't need
 
+  private async connectChannel() {
+    this.channel = await this.connection.createChannel();
+
+    await this.channel.assertExchange(this.exchangeName, 'fanout', {
+      durable: false,
+    });
+  }
   async onModuleInit() {
     this.connection = await connect({
       protocol: 'amqps',
@@ -21,11 +32,7 @@ export class RabbitMqService implements OnModuleInit {
       password: this.configService.get('RABBITMQ_PASSWORD'),
     });
 
-    this.channel = await this.connection.createChannel();
-
-    await this.channel.assertExchange(this.exchangeName, 'fanout', {
-      durable: false,
-    });
+    await this.connectChannel();
 
     // await this.channel.assertQueue(this.queueName, {
     //   durable: false,
@@ -40,11 +47,27 @@ export class RabbitMqService implements OnModuleInit {
     await this.connection.close();
   }
   public async sendMessage(options: { routingKey?: string; body: string }) {
-    const { routingKey = '', body } = options;
-    return await this.channel.publish(
-      this.configService.get('RABBITMQ_EXCHANGE_NAME')!,
-      routingKey,
-      Buffer.from(body),
-    );
+    const originalFunction = async () => {
+      const { routingKey = '', body } = options;
+      return await this.channel.publish(
+        this.configService.get('RABBITMQ_EXCHANGE_NAME')!,
+        routingKey,
+        Buffer.from(body),
+      );
+    };
+    try {
+      return await originalFunction();
+    } catch {
+      try {
+        await this.connectChannel();
+        return await originalFunction();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        throw new InternalServerErrorException(
+          'Error when publish message to rabbitmq',
+          error.name,
+        );
+      }
+    }
   }
 }
