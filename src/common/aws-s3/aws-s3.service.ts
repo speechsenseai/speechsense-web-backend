@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
@@ -81,6 +82,19 @@ export class AwsS3Service {
       });
 
       return { url };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  async deleteFile(path: string) {
+    try {
+      const key = `${path.startsWith('/') ? '' : '/'}${path}${path.endsWith('/') ? '' : '/'}`;
+
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
+      return await this.s3.send(command);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { User } from '../users/entities/user.entity';
 import { DeviceService } from '../device/device.service';
 import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
@@ -52,17 +56,23 @@ export class RecordingService {
         recordingS3Link: res.url,
       });
       recording.device = device;
-      const recordingSaved = await this.recordingRepository.save(recording);
-      await this.rabbitMqService.sendMessage({
-        body: JSON.stringify({
-          record_id: extractFilenameWithoutExtension(filename),
-          record_tstamp: recordingSaved.createdAt,
-          user_id: user.id,
-          device_id: device.id,
-          location_id: device.location.id,
-        }),
-      });
-      return recordingSaved;
+      try {
+        const recordingSaved = await this.recordingRepository.save(recording);
+        await this.rabbitMqService.sendMessage({
+          body: JSON.stringify({
+            record_id: extractFilenameWithoutExtension(filename),
+            record_tstamp: recordingSaved.createdAt,
+            user_id: user.id,
+            device_id: device.id,
+            location_id: device.location.id,
+          }),
+        });
+        return recordingSaved;
+      } catch (error) {
+        await this.recordingRepository.delete({ id: recording.id });
+        await this.awsS3Servie.deleteFile(res.key);
+        throw new InternalServerErrorException(error);
+      }
     }
     return foundRecording;
   }
