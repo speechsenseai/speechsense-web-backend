@@ -15,6 +15,7 @@ import { ProfileModule } from './modules/profile/profile.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { RabbitMqModule } from './common/rabbitmq/rabbitmq.module';
 import { DeviceStrategy } from './modules/device/guard/device.strategy';
+import { Profile } from './modules/profile/entities/profile.entity';
 
 @Module({
   imports: [
@@ -29,13 +30,14 @@ import { DeviceStrategy } from './modules/device/guard/device.strategy';
     RabbitMqModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
+      entities: [User, Location, Device, Recording, Profile],
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize: process.env.NODE_ENV === 'development' ? true : false,
-      entities: [User, Location, Device, Recording],
+      synchronize:
+        false && process.env.NODE_ENV === 'development' ? true : false,
       ...(process.env.NODE_ENV === 'development'
         ? {}
         : {

@@ -7,7 +7,6 @@ export class ProfileService {
   async getProfile(userId: string) {
     return this.userService.findUserById({
       id: userId,
-      relations: { locations: { devices: true, users: true } },
     });
   }
 }

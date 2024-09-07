@@ -6,8 +6,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UserModule } from '../users/user.module';
-import { VerificationModule } from '../verification/verification.module';
 import { APP_GUARD } from '@nestjs/core';
+import { VerificationModule } from '../verification/verification.module';
 
 @Module({
   imports: [

@@ -7,7 +7,6 @@ import {
 import { SignUpDto } from './dto/signup.dto';
 import { UserService } from '../users/user.service';
 import { hash, compare } from 'bcrypt';
-import { VerificationService } from '../verification/verification.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signIn.dto';
 import 'dotenv/config';
@@ -15,6 +14,7 @@ import { GoogleDto } from './dto/google.dto';
 import { User } from '../users/entities/user.entity';
 import { ChangePasswordDto } from './dto/ChangePassword.dto';
 import { ResetPasswordDto } from './dto/ResetPassword.dto';
+import { VerificationService } from '../verification/verification.service';
 
 @Injectable()
 export class AuthService {

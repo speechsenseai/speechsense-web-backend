@@ -1,11 +1,12 @@
 import { BaseModel } from 'src/common/typeorm/BaseModel';
 import { Location } from 'src/modules/location/entities/location.entity';
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Profile } from 'src/modules/profile/entities/profile.entity';
+import { Column, Entity, JoinTable, ManyToMany, OneToOne } from 'typeorm';
 
 @Entity()
 export class User extends BaseModel {
   @Column({ nullable: true })
-  name: string;
+  name: string; //FIX_ME надо удалить но чтобы миграции норм были
 
   @Column({ unique: true })
   email: string;
@@ -29,10 +30,10 @@ export class User extends BaseModel {
   })
   isDeleted: boolean;
 
-  @Column({ nullable: true })
-  country: string;
-
   @ManyToMany(() => Location, (location) => location.users)
   @JoinTable()
   locations: Location[];
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  profile: Profile;
 }
