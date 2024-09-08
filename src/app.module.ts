@@ -36,8 +36,7 @@ import { Profile } from './modules/profile/entities/profile.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize:
-        false && process.env.NODE_ENV === 'development' ? true : false,
+      synchronize: process.env.NODE_ENV === 'development' ? true : false,
       ...(process.env.NODE_ENV === 'development'
         ? {}
         : {
