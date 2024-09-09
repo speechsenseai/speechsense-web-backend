@@ -7,15 +7,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'dotenv/config';
 import { UserModule } from './modules/users/user.module';
-import { User } from './modules/users/entities/user.entity';
-import { Location } from './modules/location/entities/location.entity';
-import { Device } from './modules/device/entities/device.entity';
-import { Recording } from './modules/recording/entities/recording.entity';
 import { ProfileModule } from './modules/profile/profile.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { RabbitMqModule } from './common/rabbitmq/rabbitmq.module';
 import { DeviceStrategy } from './modules/device/guard/device.strategy';
-import { Profile } from './modules/profile/entities/profile.entity';
 
 @Module({
   imports: [
@@ -30,13 +25,17 @@ import { Profile } from './modules/profile/entities/profile.entity';
     RabbitMqModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      entities: [User, Location, Device, Recording, Profile],
+      // entities: [User, Location, Device, Recording, Profile],
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
+      logging: true,
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      migrationsTableName: 'typeorm_migrations',
       synchronize: process.env.NODE_ENV === 'development' ? true : false,
+      migrationsRun: false,
       ...(process.env.NODE_ENV === 'development'
         ? {}
         : {

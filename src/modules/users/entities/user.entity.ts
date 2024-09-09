@@ -1,6 +1,6 @@
-import { BaseModel } from 'src/common/typeorm/BaseModel';
-import { Location } from 'src/modules/location/entities/location.entity';
-import { Profile } from 'src/modules/profile/entities/profile.entity';
+import { BaseModel } from '@/common/typeorm/BaseModel';
+import { Location } from '@/modules/location/entities/location.entity';
+import { Profile } from '@/modules/profile/entities/profile.entity';
 import { Column, Entity, JoinTable, ManyToMany, OneToOne } from 'typeorm';
 
 @Entity()

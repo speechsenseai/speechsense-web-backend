@@ -13,7 +13,10 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint -c .eslintrc.js --ext .ts,.tsx .",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "migration:create": "cross-var ts-node --project tsconfig.json node_modules/typeorm/cli.js migration:create ./migrations/$npm_config_name",
+    "migrate": "ts-node --project tsconfig.json node_modules/typeorm/cli.js migration:run -d ./src/datasource.ts",
+    "migration:down": "ts-node --project tsconfig.json node_modules/typeorm/cli.js migration:revert -d ./src/datasource.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.637.0",
@@ -59,6 +62,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "cross-var": "^1.1.0",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
@@ -67,7 +71,7 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.3"
   },
