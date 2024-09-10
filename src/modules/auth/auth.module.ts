@@ -8,10 +8,12 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UserModule } from '../users/user.module';
 import { APP_GUARD } from '@nestjs/core';
 import { VerificationModule } from '../verification/verification.module';
+import { ProfileModule } from '../profile/profile.module';
 
 @Module({
   imports: [
     UserModule,
+    ProfileModule,
     VerificationModule,
     JwtModule.register({
       global: true,

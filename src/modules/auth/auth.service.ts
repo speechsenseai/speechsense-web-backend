@@ -15,6 +15,7 @@ import { User } from '../users/entities/user.entity';
 import { ChangePasswordDto } from './dto/ChangePassword.dto';
 import { ResetPasswordDto } from './dto/ResetPassword.dto';
 import { VerificationService } from '../verification/verification.service';
+import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly verificationService: VerificationService,
     private readonly jwtService: JwtService,
+    private readonly profileService: ProfileService,
   ) {}
   public async signUp(body: SignUpDto) {
     const isExist = await this.userService.findUserByEmail({
@@ -33,16 +35,22 @@ export class AuthService {
     }
 
     const hashPassword = await this.hashString(body.password);
-
-    const user = await this.userService.createUser({
-      ...body,
-      password: hashPassword,
-      isEmail: true,
+    const profile = await this.profileService.createProfile({
+      name: body.name,
     });
+    const user = await this.userService.createUser(
+      {
+        email: body.email,
+        password: hashPassword,
+        isEmail: true,
+      },
+      profile,
+    );
+
     try {
       await this.verificationService.sendVerification(user.id, body.email);
     } catch {
-      await this.userService.deleteUser(user.id);
+      await this.userService.deleteUserWithProfile(user.id);
       throw new InternalServerErrorException('Error sending email');
     }
     await this.userService.createDefaultLocationDevice(user);
@@ -129,12 +137,17 @@ export class AuthService {
     });
 
     if (!user) {
-      const googleNewUser = await this.userService.createUser({
+      const profile = await this.profileService.createProfile({
         name: payload.given_name,
-        email: payload.email,
-        isGoogle: true,
-        isVerified: true,
       });
+      const googleNewUser = await this.userService.createUser(
+        {
+          email: payload.email,
+          isGoogle: true,
+          isVerified: true,
+        },
+        profile,
+      );
       await this.userService.createDefaultLocationDevice(googleNewUser);
       const tokens = await this.getTokens({
         userId: googleNewUser.id,
@@ -157,6 +170,9 @@ export class AuthService {
   public async resetPassword(body: ResetPasswordDto) {
     const user = await this.userService.findUserByEmail({
       email: body.email,
+      relations: {
+        profile: true,
+      },
     });
 
     if (!user) {
@@ -167,7 +183,7 @@ export class AuthService {
       await this.verificationService.sendResetPasswordEmail(
         user.id,
         body.email,
-        user.name,
+        user.profile.name,
       );
     } catch {
       throw new InternalServerErrorException('Error sending email');

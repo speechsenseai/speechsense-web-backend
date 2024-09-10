@@ -1,7 +1,7 @@
-import { Location } from 'src/modules/location/entities/location.entity';
-import { BaseModel } from 'src/common/typeorm/BaseModel';
+import { Location } from '@/modules/location/entities/location.entity';
+import { BaseModel } from '@/common/typeorm/BaseModel';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
-import { Recording } from 'src/modules/recording/entities/recording.entity';
+import { Recording } from '@/modules/recording/entities/recording.entity';
 
 export enum DeviceType {
   Andriod = 'android',

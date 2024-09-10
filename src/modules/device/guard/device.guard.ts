@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_FOR_DEVICE } from 'src/decorators/forDevice';
+import { IS_FOR_DEVICE } from '@/decorators/forDevice';
 
 @Injectable()
 export class DeviceGuard extends AuthGuard(['device-jwt']) {

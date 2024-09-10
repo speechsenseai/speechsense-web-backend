@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
-import { Public } from 'src/decorators/public';
+import { Public } from '@/decorators/public';
 import { SignInDto } from './dto/signIn.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ApiTags } from '@nestjs/swagger';

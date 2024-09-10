@@ -4,6 +4,8 @@ import { serializeUser } from './serializers/user.serialize';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -11,7 +13,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { SignUpDto } from '../auth/dto/signup.dto';
-import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
+import { AwsS3Service } from '@/common/aws-s3/aws-s3.service';
+import { Profile } from '../profile/entities/profile.entity';
+import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
 export class UserService {
@@ -21,6 +25,8 @@ export class UserService {
     private readonly locationService: LocationService,
     private readonly deviceService: DeviceService,
     private readonly awsS3Service: AwsS3Service,
+    @Inject(forwardRef(() => ProfileService))
+    private readonly profileService: ProfileService,
   ) {}
   public async findUserByEmail(options: {
     email: string;
@@ -61,8 +67,16 @@ export class UserService {
     }
     return user;
   }
-  public async deleteUser(id: string) {
-    return this.userRepository.delete(id);
+  public async deleteUserWithProfile(id: string) {
+    const user = await this.findUserById({
+      id,
+      serialize: false,
+      relations: { profile: true },
+    });
+    if (user?.profile.id) {
+      await this.profileService.deleteProfile(user?.profile.id);
+    }
+    return await this.userRepository.delete(id);
   }
   public async save(user: User) {
     return this.userRepository.save(user);
@@ -78,15 +92,19 @@ export class UserService {
   }
 
   public async createUser(
-    user: Partial<
+    userPayload: Partial<
       SignUpDto & {
         isGoogle: boolean;
         isEmail: boolean;
         isVerified: boolean;
       }
     >,
+    profile: Profile,
   ) {
-    return serializeUser(await this.userRepository.save(user));
+    const user = this.userRepository.create(userPayload);
+    user.profile = profile;
+    await this.userRepository.save(user);
+    return serializeUser(user);
   }
 
   public async activateUser(id: string) {
@@ -118,7 +136,7 @@ export class UserService {
       await this.awsS3Service.createFolder({ path });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      await this.deleteUser(user.id);
+      await this.deleteUserWithProfile(user.id); //FIX_ME может быть это будет багом, но сейчас это выглядит правильно
       throw new InternalServerErrorException(
         'Error creating folder s3',
         error?.name,

@@ -10,7 +10,7 @@ import { Device } from '../device/entities/device.entity';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { CreateLocationDto } from './dto/CreateLocation.dto';
 import { User } from '../users/entities/user.entity';
-import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
+import { AwsS3Service } from '@/common/aws-s3/aws-s3.service';
 
 @Injectable()
 export class LocationService {

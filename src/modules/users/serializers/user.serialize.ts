@@ -1,9 +1,12 @@
+import { Profile } from '@/modules/profile/entities/profile.entity';
 import { User } from '../entities/user.entity';
+import { Location } from '@/modules/location/entities/location.entity';
 
-export const serializeUser = (user: User) => {
+export const serializeUser = (
+  user: User,
+): User & { profile?: Profile; locations?: Location[] } => {
   return {
     id: user.id,
-    name: user.name,
     locations: user.locations,
     email: user.email,
     isVerified: user.isVerified,

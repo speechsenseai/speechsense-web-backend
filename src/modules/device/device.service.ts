@@ -10,7 +10,7 @@ import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { CreateDeviceDto } from './dto/CreateDevice.dto';
 import { User } from '../users/entities/user.entity';
 import { LocationService } from '../location/location.service';
-import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
+import { AwsS3Service } from '@/common/aws-s3/aws-s3.service';
 import { ConnectDeviceDto } from './dto/ConnectDevice.dto';
 import { JwtService } from '@nestjs/jwt';
 

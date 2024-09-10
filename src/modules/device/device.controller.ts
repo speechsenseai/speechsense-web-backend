@@ -4,7 +4,7 @@ import { DeviceService } from './device.service';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { CreateDeviceDto } from './dto/CreateDevice.dto';
 import { ConnectDeviceDto } from './dto/ConnectDevice.dto';
-import { Public } from 'src/decorators/public';
+import { Public } from '@/decorators/public';
 
 @ApiTags('Devices')
 @Controller('devices')

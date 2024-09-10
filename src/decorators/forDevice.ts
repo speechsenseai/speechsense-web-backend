@@ -1,6 +1,6 @@
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 import { Public } from './public';
-import { DeviceGuard } from 'src/modules/device/guard/device.guard';
+import { DeviceGuard } from '@/modules/device/guard/device.guard';
 
 export const IS_FOR_DEVICE = 'for_device';
 export const ForDevice = () => {
