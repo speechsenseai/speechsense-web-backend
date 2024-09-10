@@ -14,9 +14,9 @@
     "start:prod": "node dist/main",
     "lint": "eslint -c .eslintrc.js --ext .ts,.tsx .",
     "lint:fix": "npm run lint -- --fix",
-    "migration:create": "cross-var ts-node --project tsconfig.json node_modules/typeorm/cli.js migration:create ./migrations/$npm_config_name",
-    "migrate": "ts-node --project tsconfig.json node_modules/typeorm/cli.js migration:run -d ./src/datasource.ts",
-    "migration:down": "ts-node --project tsconfig.json node_modules/typeorm/cli.js migration:revert -d ./src/datasource.ts"
+    "migration:create": "cross-var ts-node -r tsconfig-paths/register --project tsconfig.json node_modules/typeorm/cli.js migration:create ./migrations/$npm_config_name",
+    "migrate": "ts-node -r tsconfig-paths/register --project tsconfig.json node_modules/typeorm/cli.js migration:run -d ./datasource.ts",
+    "migration:down": "ts-node -r tsconfig-paths/register --project tsconfig.json node_modules/typeorm/cli.js migration:revert -d ./datasource.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.637.0",

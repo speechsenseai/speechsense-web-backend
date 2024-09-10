@@ -22,5 +22,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./migrations/*"]
+  "include": ["./migrations/*", "**/*.ts"]
 }

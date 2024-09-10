@@ -5,17 +5,17 @@ import {
 } from '@nestjs/common';
 import { User } from '../users/entities/user.entity';
 import { DeviceService } from '../device/device.service';
-import { AwsS3Service } from 'src/common/aws-s3/aws-s3.service';
+import { AwsS3Service } from '@/common/aws-s3/aws-s3.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Recording } from './entities/recording.entity';
 import { Repository } from 'typeorm';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
-import { RabbitMqService } from 'src/common/rabbitmq/rabbitmq.service';
+import { RabbitMqService } from '@/common/rabbitmq/rabbitmq.service';
 import { v4 as uuidv4 } from 'uuid';
 import {
   extractFilenameWithoutExtension,
   sanitazeFilname,
-} from 'src/common/lib/sanitazeFilename';
+} from '@/common/lib/sanitazeFilename';
 
 @Injectable()
 export class RecordingService {

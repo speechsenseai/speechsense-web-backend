@@ -1,13 +1,17 @@
 import { BaseModel } from '@/common/typeorm/BaseModel';
 import { Location } from '@/modules/location/entities/location.entity';
 import { Profile } from '@/modules/profile/entities/profile.entity';
-import { Column, Entity, JoinTable, ManyToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+} from 'typeorm';
 
 @Entity()
 export class User extends BaseModel {
-  @Column({ nullable: true })
-  name: string; //FIX_ME надо удалить но чтобы миграции норм были
-
   @Column({ unique: true })
   email: string;
 
@@ -34,6 +38,7 @@ export class User extends BaseModel {
   @JoinTable()
   locations: Location[];
 
-  @OneToOne(() => Profile, (profile) => profile.user)
+  @OneToOne(() => Profile)
+  @JoinColumn({ name: 'profileId' })
   profile: Profile;
 }

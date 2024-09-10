@@ -13,7 +13,7 @@ import {
 import { RecordingService } from './recording.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
-import { ForDevice } from 'src/decorators/forDevice';
+import { ForDevice } from '@/decorators/forDevice';
 
 const MAX_FILE_SIZE = 10000000000;
 @ApiTags('Recordings')

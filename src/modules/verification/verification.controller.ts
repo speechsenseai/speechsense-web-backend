@@ -2,7 +2,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Post } from '@nestjs/common';
 import { VerifyEmailDto } from './dto/verifyEmail.dto';
 import { VerificationService } from './verification.service';
-import { Public } from 'src/decorators/public';
+import { Public } from '@/decorators/public';
 
 @ApiTags('verification')
 @Controller('verification')

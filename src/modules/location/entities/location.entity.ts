@@ -1,6 +1,6 @@
-import { BaseModel } from 'src/common/typeorm/BaseModel';
-import { Device } from 'src/modules/device/entities/device.entity';
-import { User } from 'src/modules/users/entities/user.entity';
+import { BaseModel } from '@/common/typeorm/BaseModel';
+import { Device } from '@/modules/device/entities/device.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
 
 @Entity()

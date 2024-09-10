@@ -1,5 +1,5 @@
-import { BaseModel } from 'src/common/typeorm/BaseModel';
-import { Device } from 'src/modules/device/entities/device.entity';
+import { BaseModel } from '@/common/typeorm/BaseModel';
+import { Device } from '@/modules/device/entities/device.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
