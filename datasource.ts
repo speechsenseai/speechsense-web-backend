@@ -2,11 +2,10 @@ import { DataSource } from 'typeorm';
 import { join } from 'path';
 import 'dotenv/config';
 
-console.log(join(__dirname, '/../migrations/**/*{.ts,.js}'));
-
 export const connectionSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
+  host:
+    process.env.NODE_ENV === 'development' ? 'localhost' : process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,

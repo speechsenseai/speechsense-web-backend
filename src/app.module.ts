@@ -33,7 +33,7 @@ import { DeviceStrategy } from './modules/device/guard/device.strategy';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       migrationsTableName: 'typeorm_migrations',
       synchronize: process.env.NODE_ENV === 'development' ? true : false,
-      migrationsRun: false,
+      migrationsRun: true,
       ...(process.env.NODE_ENV === 'development'
         ? {}
         : {
