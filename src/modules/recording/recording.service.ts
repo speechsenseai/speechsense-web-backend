@@ -41,10 +41,11 @@ export class RecordingService {
     const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
     const filename = sanitazeFilname(file.originalname, uuidv4());
 
-    const res = await this.awsS3Servie.uploadMp3File({
+    const res = await this.awsS3Servie.uploadFile({
       fileBuffer: file.buffer,
       path: path,
       fileName: filename,
+      contentType: 'audio/mpeg',
     });
     const foundRecording = await this.recordingRepository.findOne({
       where: {

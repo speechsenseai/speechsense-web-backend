@@ -13,8 +13,8 @@ export class Profile extends BaseModel {
   @Column({ nullable: true })
   phone: string;
 
-  @Column({ nullable: true })
-  avatarUrl: string;
+  @Column({ nullable: true, type: 'text' })
+  avatarUrl: string | null;
 
   @Column({ nullable: true })
   name: string;
@@ -23,7 +23,7 @@ export class Profile extends BaseModel {
   surname: string;
 
   @Column({ nullable: true })
-  organiztionName: string;
+  organizationName: string;
 
   @OneToOne(() => User, (user) => user.profile)
   user: User;

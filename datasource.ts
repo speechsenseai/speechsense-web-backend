@@ -16,4 +16,11 @@ export const connectionSource = new DataSource({
   synchronize: false,
   migrationsTableName: 'typeorm_migrations',
   migrationsRun: false,
+  ...(process.env.NODE_ENV === 'development'
+    ? {}
+    : {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }),
 });
