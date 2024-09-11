@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { User } from '../users/entities/user.entity';
 import { DeviceService } from '../device/device.service';
@@ -26,6 +27,7 @@ export class RecordingService {
     @InjectRepository(Recording)
     private readonly recordingRepository: Repository<Recording>,
   ) {}
+  private readonly logger = new Logger(RecordingService.name);
   async uploadAudio(user: User, deviceId: string, file: Express.Multer.File) {
     if (!file) throw new BadRequestException('File is required');
     const device = await this.deviceService.findDeviceById({
@@ -70,8 +72,7 @@ export class RecordingService {
         });
         return recordingSaved;
       } catch (error) {
-        await this.recordingRepository.delete({ id: recording.id });
-        await this.awsS3Servie.deleteFile(res.key);
+        this.logger.error('Error sending recording to rabbitmq', error);
         throw new InternalServerErrorException(error);
       }
     }
