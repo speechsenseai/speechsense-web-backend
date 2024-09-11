@@ -89,7 +89,7 @@ export class AwsS3Service {
   }
   async deleteFile(path: string) {
     try {
-      const key = `${path.startsWith('/') ? '' : '/'}${path}${path.endsWith('/') ? '' : '/'}`;
+      const key = `${path.startsWith('/') ? '' : '/'}${path}`;
 
       const command = new DeleteObjectCommand({
         Bucket: this.bucketName,
