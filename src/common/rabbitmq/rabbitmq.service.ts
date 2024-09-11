@@ -19,7 +19,7 @@ export class RabbitMqService implements OnModuleInit {
   );
   private readonly options = {
     heartbeatIntervalInSeconds: 60,
-    reconnectTimeInSeconds: 5000,
+    reconnectTimeInSeconds: 5,
   };
   // private readonly queueName = `records_web_backend_queue_${uuidv4()}`; FIX_ME now it isn't need
 
