@@ -5,17 +5,22 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { connect, Connection, Channel } from 'amqplib';
+import { connect, ChannelWrapper } from 'amqp-connection-manager';
+import { IAmqpConnectionManager } from 'amqp-connection-manager/dist/types/AmqpConnectionManager';
 
 @Injectable()
 export class RabbitMqService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {}
-  private connection: Connection;
-  private channel: Channel;
+  private connection: IAmqpConnectionManager;
+  private channel: ChannelWrapper;
   private readonly logger = new Logger(RabbitMqService.name);
   private readonly exchangeName = this.configService.get(
     'RABBITMQ_EXCHANGE_NAME',
   );
+  private readonly options = {
+    heartbeatIntervalInSeconds: 60,
+    reconnectTimeInSeconds: 5,
+  };
   // private readonly queueName = `records_web_backend_queue_${uuidv4()}`; FIX_ME now it isn't need
 
   async onModuleInit() {
@@ -31,15 +36,14 @@ export class RabbitMqService implements OnModuleInit {
 
       this.connection = await connect(
         `amqps://${username}:${password}@${host}:${port}`,
+        this.options,
       );
       this.connection.on('error', (err) => {
         this.logger.error('RabbitMQ connection error:', err);
-        this.reconnectToRabbitMQ();
       });
 
       this.connection.on('close', () => {
         this.logger.warn('RabbitMQ connection closed');
-        this.reconnectToRabbitMQ();
       });
 
       await this.connectChannel();
@@ -47,7 +51,6 @@ export class RabbitMqService implements OnModuleInit {
       this.logger.log('Connected to RabbitMQ');
     } catch (error) {
       this.logger.error('Failed to connect to RabbitMQ:', error);
-      setTimeout(() => this.connectToRabbitMQ(), 5000); // Retry after 5 seconds
     }
   }
 
@@ -59,10 +62,6 @@ export class RabbitMqService implements OnModuleInit {
     });
   }
 
-  private reconnectToRabbitMQ() {
-    setTimeout(() => this.connectToRabbitMQ(), 5000); // Retry after 5 seconds
-  }
-
   async closeConnection() {
     await this.channel.close();
     await this.connection.close();
@@ -72,7 +71,7 @@ export class RabbitMqService implements OnModuleInit {
       this.logger.error('Channel is not initialized');
       throw new InternalServerErrorException('Channel is not initialized');
     }
-    const originalFunction = async () => {
+    try {
       const { routingKey = '', body } = options;
       const res = await this.channel.publish(
         this.configService.get('RABBITMQ_EXCHANGE_NAME')!,
@@ -83,20 +82,12 @@ export class RabbitMqService implements OnModuleInit {
         `Message published to exchange ${this.exchangeName}: ${body}`,
       );
       return res;
-    };
-    try {
-      return await originalFunction();
-    } catch {
-      try {
-        await this.connectChannel();
-        return await originalFunction();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        throw new InternalServerErrorException(
-          'Error when publish message to rabbitmq',
-          error.name,
-        );
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        'Error when publish message to rabbitmq',
+        error.name,
+      );
     }
   }
 }

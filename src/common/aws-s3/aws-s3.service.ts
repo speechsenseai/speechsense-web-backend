@@ -23,19 +23,20 @@ export class AwsS3Service {
     });
   }
 
-  async uploadMp3File(options: {
+  async uploadFile(options: {
     fileBuffer: Buffer;
     path: string;
     fileName: string;
+    contentType: string;
   }) {
-    const { fileBuffer, path, fileName } = options;
+    const { fileBuffer, path, fileName, contentType } = options;
     const key = `${path.startsWith('/') ? '' : '/'}${path}${path.endsWith('/') ? '' : '/'}${fileName}`;
 
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
       Body: fileBuffer,
-      ContentType: 'audio/mpeg',
+      ContentType: contentType,
       Metadata: {
         originalName: fileName,
       },

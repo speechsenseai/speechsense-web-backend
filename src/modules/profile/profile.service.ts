@@ -1,8 +1,16 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { UserService } from '../users/user.service';
 import { FindOneOptions, Repository } from 'typeorm';
 import { Profile } from './entities/profile.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AwsS3Service } from '@/common/aws-s3/aws-s3.service';
+import { v4 as uuidv4 } from 'uuid';
+import { sanitazeFilname } from '@/common/lib/sanitazeFilename';
 
 @Injectable()
 export class ProfileService {
@@ -11,6 +19,7 @@ export class ProfileService {
     private readonly userService: UserService,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
+    private readonly awsS3Service: AwsS3Service,
   ) {}
   async getProfile(userId: string) {
     return this.userService.findUserById({
@@ -44,8 +53,25 @@ export class ProfileService {
     return this.profileRepository.save(profile);
   }
 
-  async update(id: string, updateProfileBody: Profile) {
-    const profileToUpdate = await this.profileRepository.findOneBy({ id });
+  async updateByUserId(
+    id: string,
+    updateProfileBody: Omit<Partial<Profile>, 'user'>,
+  ) {
+    const user = await this.userService.findUserById({
+      id,
+      relations: { profile: true },
+    });
+    const profileToUpdate = user?.profile;
+    const updatedProfile = {
+      ...profileToUpdate,
+      ...updateProfileBody,
+    };
+    return this.profileRepository.save(updatedProfile);
+  }
+  async update(id: string, updateProfileBody: Omit<Partial<Profile>, 'user'>) {
+    const profileToUpdate = await this.findUserById({
+      id,
+    });
     const updatedProfile = {
       ...profileToUpdate,
       ...updateProfileBody,
@@ -55,5 +81,38 @@ export class ProfileService {
 
   public async createProfile(profilePayload: Partial<Profile>) {
     return await this.profileRepository.save(profilePayload);
+  }
+
+  public async uploadAvatar(userId: string, file: Express.Multer.File | null) {
+    const user = await this.userService.findUserById({
+      id: userId,
+      relations: { profile: true },
+    });
+
+    const profile = user?.profile;
+    if (!profile) {
+      throw new BadRequestException('Profile not found');
+    }
+    const filename = profile.avatarUrl?.split('/').pop();
+    const currentPathAvatarUrl = `/avatars/${filename}`;
+
+    if (!file) {
+      await this.awsS3Service.deleteFile(currentPathAvatarUrl);
+      return await this.update(profile.id, {
+        avatarUrl: null,
+      });
+    } else {
+      await this.awsS3Service.deleteFile(currentPathAvatarUrl);
+
+      const res = await this.awsS3Service.uploadFile({
+        fileBuffer: file.buffer,
+        path: `avatars/`,
+        fileName: `${profile.id}_${uuidv4()}_${sanitazeFilname(file.originalname)}`,
+        contentType: file.mimetype,
+      });
+      return await this.update(profile.id, {
+        avatarUrl: res.url,
+      });
+    }
   }
 }
