@@ -78,7 +78,31 @@ export class RecordingService {
     }
     return foundRecording;
   }
-
+  async getAllRecordings(
+    userId: string,
+    query: PaginateQuery,
+    locationId?: string,
+    deviceId?: string,
+  ) {
+    return paginate(query, this.recordingRepository, {
+      sortableColumns: ['createdAt'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      searchableColumns: ['recordingS3Link'],
+      maxLimit: 10,
+      defaultLimit: 10,
+      where: {
+        device: {
+          ...(deviceId ? { id: deviceId } : {}),
+          location: {
+            ...(locationId ? { id: locationId } : {}),
+            users: {
+              id: userId,
+            },
+          },
+        },
+      },
+    });
+  }
   public async getRecordings(
     userId: string,
     deviceId: string,
@@ -87,6 +111,7 @@ export class RecordingService {
     return paginate(query, this.recordingRepository, {
       sortableColumns: ['createdAt'],
       defaultSortBy: [['createdAt', 'DESC']],
+      searchableColumns: ['recordingS3Link'],
       maxLimit: 10,
       defaultLimit: 10,
       where: {
@@ -99,6 +124,25 @@ export class RecordingService {
           },
         },
       },
+    });
+  }
+  async getOneRecording(
+    userId: string,
+    recordingId: string,
+    withDeviceAndLocation?: boolean,
+  ) {
+    return this.recordingRepository.findOne({
+      where: {
+        id: recordingId,
+        device: {
+          location: {
+            users: {
+              id: userId,
+            },
+          },
+        },
+      },
+      relations: withDeviceAndLocation ? ['device', 'device.location'] : [],
     });
   }
 }

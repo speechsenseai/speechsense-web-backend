@@ -6,6 +6,7 @@ import {
   Param,
   ParseFilePipe,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -20,6 +21,32 @@ const MAX_FILE_SIZE = 10000000000;
 @Controller('recordings')
 export class RecordingController {
   constructor(private readonly recordingService: RecordingService) {}
+  @Get('all')
+  getAllRecordings(
+    @Req() req,
+    @Paginate() query: PaginateQuery,
+    @Query('locationId') locationId?: string,
+    @Query('deviceId') deviceId?: string,
+  ) {
+    return this.recordingService.getAllRecordings(
+      req.user.sub,
+      query,
+      locationId,
+      deviceId,
+    );
+  }
+  @Get('one/:recordingId')
+  getRecording(
+    @Req() req,
+    @Param('recordingId') recordingId: string,
+    @Query('withDeviceAndLocation') withDeviceAndLocation?: string,
+  ) {
+    return this.recordingService.getOneRecording(
+      req.user.sub,
+      recordingId,
+      JSON.parse(withDeviceAndLocation ?? 'false'),
+    );
+  }
   @Get(':deviceId')
   getRecordings(
     @Req() req,

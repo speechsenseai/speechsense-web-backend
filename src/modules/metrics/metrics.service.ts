@@ -11,9 +11,57 @@ export class MetricsService {
       baseURL: this.configService.get('AUDIO_METRICS_BACKEND_URL'),
     });
   }
-  async getNumericMetrics(user: User) {
+  async getNumericMetrics(options: {
+    user: User;
+    locationId?: string;
+    deviceId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const { user, locationId, deviceId, startDate, endDate } = options;
     try {
       const res = await this.requester.post('/numeric_metrics', {
+        user_id: user.id,
+        location_id: locationId,
+        device_id: deviceId,
+        max_tstamp: endDate,
+        min_tstamp: startDate,
+      });
+      return res.data;
+    } catch (error) {
+      if (isAxiosError(error)) {
+        throw new InternalServerErrorException(error.response?.data);
+      }
+      throw error;
+    }
+  }
+  async getInsightMetrics(options: {
+    user: User;
+    locationId?: string;
+    deviceId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const { user, locationId, deviceId, startDate, endDate } = options;
+    try {
+      const res = await this.requester.post('/insights', {
+        user_id: user.id,
+        location_id: locationId,
+        device_id: deviceId,
+        max_tstamp: endDate,
+        min_tstamp: startDate,
+      });
+      return res.data;
+    } catch (error) {
+      if (isAxiosError(error)) {
+        throw new InternalServerErrorException(error.response?.data);
+      }
+      throw error;
+    }
+  }
+  async getProcessingStatus(user: User) {
+    try {
+      const res = await this.requester.post('/processing_status', {
         user_id: user.id,
       });
       return res.data;
@@ -24,12 +72,10 @@ export class MetricsService {
       throw error;
     }
   }
-  async getInsightMetrics(user: User) {
+  async getRecordingLines(recordId: string) {
     try {
-      const res = await this.requester.post('/insights', {
-        user_id: user.id,
-        min_tstamp: '2020-01-29T09:50:08.973Z', //FIX_ME
-        max_tstamp: new Date().toISOString(),
+      const res = await this.requester.post('/get_transcribed_lines', {
+        record_id: recordId,
       });
       return res.data;
     } catch (error) {
