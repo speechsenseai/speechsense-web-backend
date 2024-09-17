@@ -7,6 +7,9 @@ export class Recording extends BaseModel {
   @Column()
   recordingS3Link: string;
 
+  @Column({ nullable: true })
+  metric_id: string;
+
   @ManyToOne(() => Device, (device) => device.recordings)
   device: Device;
 }

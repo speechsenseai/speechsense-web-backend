@@ -57,6 +57,7 @@ export class RecordingService {
     if (!foundRecording) {
       const recording = this.recordingRepository.create({
         recordingS3Link: res.url,
+        metric_id: extractFilenameWithoutExtension(filename),
       });
       recording.device = device;
       try {
