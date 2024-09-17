@@ -7,18 +7,22 @@ export class RenameOrganizationNameProfile1726062435767
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.renameColumn(
-      'profile',
-      'organiztionName',
-      'organizationName',
-    );
+    if (await queryRunner.hasColumn('profile', 'organiztionName')) {
+      await queryRunner.renameColumn(
+        'profile',
+        'organiztionName',
+        'organizationName',
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.renameColumn(
-      'profile',
-      'organizationName',
-      'organiztionName',
-    );
+    if (await queryRunner.hasColumn('profile', 'organizationName')) {
+      await queryRunner.renameColumn(
+        'profile',
+        'organizationName',
+        'organiztionName',
+      );
+    }
   }
 }
