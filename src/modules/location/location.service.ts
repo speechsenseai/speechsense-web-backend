@@ -57,6 +57,25 @@ export class LocationService {
     });
     return savedLocation;
   }
+  public async updateLocation(
+    user: User,
+    locationId: string,
+    body: CreateLocationDto,
+  ) {
+    const location = await this.locationRepository.findOne({
+      where: {
+        id: locationId,
+        users: {
+          id: user.id,
+        },
+      },
+    });
+    if (!location) {
+      throw new BadRequestException('Location not found');
+    }
+    Object.assign(location, body);
+    return this.locationRepository.save(location);
+  }
 
   public async createDefaultLocation(device: Device) {
     const location = this.locationRepository.create();

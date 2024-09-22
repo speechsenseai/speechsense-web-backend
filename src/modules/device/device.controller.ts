@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DeviceService } from './device.service';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
@@ -23,6 +23,15 @@ export class DeviceController {
     @Param('locationId') locationId: string,
   ) {
     return this.deviceService.getDevices(req.user.sub, locationId, query);
+  }
+
+  @Put(':deviceId')
+  updateDevice(
+    @Req() req,
+    @Param('deviceId') deviceId: string,
+    @Body() body: CreateDeviceDto,
+  ) {
+    return this.deviceService.updateDevice(req.user.user, deviceId, body);
   }
 
   @Post(':locationId')

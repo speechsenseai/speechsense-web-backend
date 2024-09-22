@@ -66,6 +66,29 @@ export class DeviceService {
     });
     return savedDevice;
   }
+
+  public async updateDevice(
+    user: User,
+    deviceId: string,
+    body: CreateDeviceDto,
+  ) {
+    const device = await this.deviceRepository.findOne({
+      where: {
+        id: deviceId,
+        location: {
+          users: {
+            id: user.id,
+          },
+        },
+      },
+    });
+    if (!device) {
+      throw new BadRequestException('Device not found');
+    }
+    Object.assign(device, body);
+    return this.deviceRepository.save(device);
+  }
+
   public async createDefaultDevice() {
     const device = this.deviceRepository.create();
     device.type = DeviceType.Web;

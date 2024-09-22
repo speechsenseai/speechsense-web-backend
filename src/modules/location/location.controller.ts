@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { LocationService } from './location.service';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
@@ -16,6 +16,15 @@ export class LocationController {
   @Get(':locationId')
   getOneLocation(@Req() req, @Param('locationId') locationId: string) {
     return this.locationService.getOneLocation(req.user.user, locationId);
+  }
+
+  @Put(':locationId')
+  updateLocation(
+    @Req() req,
+    @Param('locationId') locationId: string,
+    @Body() body: CreateLocationDto,
+  ) {
+    return this.locationService.updateLocation(req.user.user, locationId, body);
   }
 
   @Post()
