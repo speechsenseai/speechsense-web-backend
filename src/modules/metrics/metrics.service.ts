@@ -35,6 +35,30 @@ export class MetricsService {
       throw error;
     }
   }
+  async getNumericByDayMetrics(options: {
+    user: User;
+    locationId?: string;
+    deviceId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const { user, locationId, deviceId, startDate, endDate } = options;
+    try {
+      const res = await this.requester.post('/numeric_insights_daily', {
+        user_id: user.id,
+        location_id: locationId,
+        device_id: deviceId,
+        max_tstamp: endDate,
+        min_tstamp: startDate,
+      });
+      return res.data;
+    } catch (error) {
+      if (isAxiosError(error)) {
+        throw new InternalServerErrorException(error.response?.data);
+      }
+      throw error;
+    }
+  }
   async getInsightMetrics(options: {
     user: User;
     locationId?: string;
@@ -59,6 +83,7 @@ export class MetricsService {
       throw error;
     }
   }
+
   async getProcessingStatus(user: User) {
     try {
       const res = await this.requester.post('/processing_status', {

@@ -37,6 +37,24 @@ export class MetricsController {
       endDate,
     });
   }
+
+  @Get('numericByDay')
+  getNumericByDayMetrics(
+    @Req() req,
+    @Query('locationId') locationId?: string,
+    @Query('deviceId') deviceId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.metricsService.getNumericByDayMetrics({
+      user: req.user.user,
+      locationId,
+      deviceId,
+      startDate,
+      endDate,
+    });
+  }
+
   @Get('processing_status')
   getProcessingStatus(@Req() req) {
     return this.metricsService.getProcessingStatus(req.user.user);
