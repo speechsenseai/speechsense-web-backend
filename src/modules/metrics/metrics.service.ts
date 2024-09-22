@@ -72,10 +72,36 @@ export class MetricsService {
       throw error;
     }
   }
-  async getRecordingLines(recordId: string) {
+  async getRecordingLines(options: {
+    user: User;
+    locationId?: string;
+    deviceId?: string;
+    startDate?: string;
+    endDate?: string;
+    use_pagination?: string;
+    offset?: string;
+    n_lines?: string;
+  }) {
+    const {
+      user,
+      locationId,
+      deviceId,
+      startDate,
+      endDate,
+      use_pagination,
+      offset,
+      n_lines,
+    } = options;
     try {
       const res = await this.requester.post('/get_transcribed_lines', {
-        record_id: recordId,
+        user_id: user.id,
+        location_id: locationId,
+        device_id: deviceId,
+        max_tstamp: endDate,
+        min_tstamp: startDate,
+        use_pagination: use_pagination,
+        offset: offset,
+        n_lines: n_lines,
       });
       return res.data;
     } catch (error) {

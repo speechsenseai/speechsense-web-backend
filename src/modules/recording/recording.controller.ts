@@ -35,16 +35,18 @@ export class RecordingController {
       deviceId,
     );
   }
-  @Get('one/:recordingId')
+  @Get('one/:recordingCriteria')
   getRecording(
     @Req() req,
-    @Param('recordingId') recordingId: string,
+    @Param('recordingCriteria') recordingCriteria: string,
     @Query('withDeviceAndLocation') withDeviceAndLocation?: string,
+    @Query('useMetricId') useMetricId?: string,
   ) {
     return this.recordingService.getOneRecording(
       req.user.sub,
-      recordingId,
+      recordingCriteria,
       JSON.parse(withDeviceAndLocation ?? 'false'),
+      JSON.parse(useMetricId ?? 'false'),
     );
   }
   @Get(':deviceId')

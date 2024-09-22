@@ -130,12 +130,15 @@ export class RecordingService {
   }
   async getOneRecording(
     userId: string,
-    recordingId: string,
+    recordingCriteria: string,
     withDeviceAndLocation?: boolean,
+    useMetricId?: boolean,
   ) {
-    return this.recordingRepository.findOne({
+    const record = await this.recordingRepository.findOne({
       where: {
-        id: recordingId,
+        ...(useMetricId
+          ? { metric_id: recordingCriteria }
+          : { id: recordingCriteria }),
         device: {
           location: {
             users: {
@@ -146,6 +149,7 @@ export class RecordingService {
       },
       relations: withDeviceAndLocation ? ['device', 'device.location'] : [],
     });
+    return record;
   }
 
   async deleteRecordingWithoutDeletingInS3(

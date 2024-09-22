@@ -112,13 +112,7 @@ export class LocationService {
           device.recordings.map(async (recording) => {
             return await this.rabbitMqService.sendMessage({
               body: JSON.stringify({
-                record_id:
-                  recording.metric_id ??
-                  //It's temporary, record.metric_id is primary
-                  recording.recordingS3Link
-                    .split('/')
-                    .pop()
-                    ?.replace('.mp3', ''),
+                record_id: recording.metric_id,
                 record_tstamp: recording.createdAt,
                 user_id: user.id,
                 device_id: device.id,
