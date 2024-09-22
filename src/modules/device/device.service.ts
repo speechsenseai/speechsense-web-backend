@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -13,15 +15,21 @@ import { LocationService } from '../location/location.service';
 import { AwsS3Service } from '@/common/aws-s3/aws-s3.service';
 import { ConnectDeviceDto } from './dto/ConnectDevice.dto';
 import { JwtService } from '@nestjs/jwt';
+import { RecordingService } from '../recording/recording.service';
+import { RabbitMqService } from '@/common/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class DeviceService {
   constructor(
     @InjectRepository(Device)
     private readonly deviceRepository: Repository<Device>,
+    @Inject(forwardRef(() => LocationService))
     private readonly locationService: LocationService,
+    @Inject(forwardRef(() => RecordingService))
+    private readonly recordingService: RecordingService,
     private readonly awsS3Service: AwsS3Service,
     private readonly jwtService: JwtService,
+    private readonly rabbitMqService: RabbitMqService,
   ) {}
   public async getDevices(
     userId: string,
@@ -87,6 +95,83 @@ export class DeviceService {
     }
     Object.assign(device, body);
     return this.deviceRepository.save(device);
+  }
+
+  public async deleteDeviceWithS3(user: User, deviceId: string) {
+    const device = await this.deviceRepository.findOne({
+      where: {
+        id: deviceId,
+        location: {
+          users: {
+            id: user.id,
+          },
+        },
+      },
+      relations: {
+        recordings: true,
+        location: true,
+      },
+    });
+    if (!device) {
+      throw new BadRequestException('Device not found');
+    }
+
+    //Send messages to delete recordings
+    await Promise.all(
+      device.recordings.map(async (recording) => {
+        return await this.rabbitMqService.sendMessage({
+          body: JSON.stringify({
+            record_id:
+              recording.metric_id ??
+              //It's temporary, record.metric_id is primary
+              recording.recordingS3Link.split('/').pop()?.replace('.mp3', ''),
+            record_tstamp: recording.createdAt,
+            user_id: user.id,
+            device_id: device.id,
+            location_id: device.location.id,
+            message_type: 'delete',
+          }),
+        });
+      }),
+    );
+
+    //Delete recordings and device folder
+    const allRecordings = device.recordings.map((recording) =>
+      this.awsS3Service.getKeyFromUrl(recording.recordingS3Link),
+    );
+    await this.awsS3Service.deleteFiles([
+      ...allRecordings,
+      `/${user.id}/${device.location.id}/${device.id}/`,
+    ]);
+
+    //Delete recordings in db
+    await Promise.all(
+      device.recordings.map(async (recording) =>
+        this.recordingService.deleteRecordingWithoutDeletingInS3(
+          user.id,
+          recording.id,
+        ),
+      ),
+    );
+
+    return this.deviceRepository.delete({ id: device.id });
+  }
+
+  public async deleteDeviceWithoutDeletingInS3(user: User, deviceId: string) {
+    const device = await this.deviceRepository.findOne({
+      where: {
+        id: deviceId,
+        location: {
+          users: {
+            id: user.id,
+          },
+        },
+      },
+    });
+    if (!device) {
+      throw new BadRequestException('Location not found');
+    }
+    return this.deviceRepository.delete(device.id);
   }
 
   public async createDefaultDevice() {

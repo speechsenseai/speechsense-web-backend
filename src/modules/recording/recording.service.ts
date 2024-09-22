@@ -69,6 +69,7 @@ export class RecordingService {
             user_id: user.id,
             device_id: device.id,
             location_id: device.location.id,
+            message_type: 'add',
           }),
         });
         return recordingSaved;
@@ -145,5 +146,22 @@ export class RecordingService {
       },
       relations: withDeviceAndLocation ? ['device', 'device.location'] : [],
     });
+  }
+
+  async deleteRecordingWithoutDeletingInS3(
+    userId: string,
+    recordingId: string,
+  ) {
+    const recording = await this.getOneRecording(userId, recordingId);
+    if (!recording) {
+      throw new BadRequestException('Recording not found');
+    }
+    try {
+      await this.recordingRepository.delete(recordingId);
+      return recording;
+    } catch (error) {
+      this.logger.error('Error deleting recording', error);
+      throw new InternalServerErrorException(error);
+    }
   }
 }

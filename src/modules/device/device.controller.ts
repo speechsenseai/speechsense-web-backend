@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DeviceService } from './device.service';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
@@ -41,5 +50,10 @@ export class DeviceController {
     @Body() body: CreateDeviceDto,
   ) {
     return this.deviceService.createDevice(req.user.user, locationId, body);
+  }
+
+  @Delete(':deviceId')
+  deleteDevice(@Req() req, @Param('deviceId') deviceId: string) {
+    return this.deviceService.deleteDeviceWithS3(req.user.user, deviceId);
   }
 }

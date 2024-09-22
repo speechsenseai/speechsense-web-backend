@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { LocationService } from './location.service';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
@@ -25,6 +34,11 @@ export class LocationController {
     @Body() body: CreateLocationDto,
   ) {
     return this.locationService.updateLocation(req.user.user, locationId, body);
+  }
+
+  @Delete(':locationId')
+  deleteLocation(@Req() req, @Param('locationId') locationId: string) {
+    return this.locationService.deleteLocationWithS3(req.user.user, locationId);
   }
 
   @Post()

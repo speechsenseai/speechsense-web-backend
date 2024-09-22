@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
@@ -70,6 +71,10 @@ export class AwsS3Service {
     };
   }
 
+  getKeyFromUrl(url: string) {
+    return url.replace(`https://${this.bucketName}.s3.amazonaws.com/`, '');
+  }
+
   async getPresignedSignedUrl(key: string) {
     //Don't need at the moment FIX_ME
     try {
@@ -94,6 +99,22 @@ export class AwsS3Service {
       const command = new DeleteObjectCommand({
         Bucket: this.bucketName,
         Key: key,
+      });
+      return await this.s3.send(command);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async deleteFiles(keys: string[]) {
+    try {
+      const command = new DeleteObjectsCommand({
+        Bucket: this.bucketName,
+        Delete: {
+          Objects: keys.map((path) => ({
+            Key: `${path.startsWith('/') ? '' : '/'}${path}`,
+          })),
+        },
       });
       return await this.s3.send(command);
     } catch (error) {

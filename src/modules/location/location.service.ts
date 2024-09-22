@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -11,6 +13,9 @@ import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { CreateLocationDto } from './dto/CreateLocation.dto';
 import { User } from '../users/entities/user.entity';
 import { AwsS3Service } from '@/common/aws-s3/aws-s3.service';
+import { RecordingService } from '../recording/recording.service';
+import { DeviceService } from '../device/device.service';
+import { RabbitMqService } from '@/common/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class LocationService {
@@ -18,6 +23,11 @@ export class LocationService {
     @InjectRepository(Location)
     private readonly locationRepository: Repository<Location>,
     private readonly awsS3Service: AwsS3Service,
+    @Inject(forwardRef(() => RecordingService))
+    private readonly recordingService: RecordingService,
+    @Inject(forwardRef(() => DeviceService))
+    private readonly deviceService: DeviceService,
+    private readonly rabbitMqService: RabbitMqService,
   ) {}
   public async getLocations(userId: string, query: PaginateQuery) {
     return paginate(query, this.locationRepository, {
@@ -75,6 +85,100 @@ export class LocationService {
     }
     Object.assign(location, body);
     return this.locationRepository.save(location);
+  }
+
+  public async deleteLocationWithS3(user: User, locationId: string) {
+    const location = await this.locationRepository.findOne({
+      where: {
+        id: locationId,
+        users: {
+          id: user.id,
+        },
+      },
+      relations: {
+        devices: {
+          recordings: true,
+        },
+      },
+    });
+    if (!location) {
+      throw new BadRequestException('Location not found');
+    }
+
+    //Send messages to delete recordings
+    await Promise.all(
+      location.devices.flatMap(async (device) => {
+        const bunch = await Promise.all(
+          device.recordings.map(async (recording) => {
+            return await this.rabbitMqService.sendMessage({
+              body: JSON.stringify({
+                record_id:
+                  recording.metric_id ??
+                  //It's temporary, record.metric_id is primary
+                  recording.recordingS3Link
+                    .split('/')
+                    .pop()
+                    ?.replace('.mp3', ''),
+                record_tstamp: recording.createdAt,
+                user_id: user.id,
+                device_id: device.id,
+                location_id: location.id,
+                message_type: 'delete',
+              }),
+            });
+          }),
+        );
+        return bunch;
+      }),
+    );
+
+    //Delete recordings and location folder in s3
+    const allRecordings = location.devices.flatMap((device) =>
+      device.recordings.map((recording) => {
+        return this.awsS3Service.getKeyFromUrl(recording.recordingS3Link);
+      }),
+    );
+    const allDevices = location.devices.map(
+      (device) => `/${user.id}/${location.id}/${device.id}/`,
+    );
+    await this.awsS3Service.deleteFiles([
+      ...allRecordings,
+      ...allDevices,
+      `/${user.id}/${location.id}/`,
+    ]);
+
+    //Delete recordings in Database
+    await Promise.all(
+      location.devices.flatMap(async (device) => {
+        const bunch = await Promise.all(
+          device.recordings.map(async (recording) => {
+            return this.recordingService.deleteRecordingWithoutDeletingInS3(
+              user.id,
+              recording.id,
+            );
+          }),
+        );
+        return bunch;
+      }),
+    );
+    await Promise.all(
+      location.devices.map(async (device) => {
+        return this.deviceService.deleteDeviceWithoutDeletingInS3(
+          user,
+          device.id,
+        );
+      }),
+    );
+    // Remove the location from the user's locations
+    await this.locationRepository
+      .createQueryBuilder()
+      .relation(User, 'locations')
+      .of(user)
+      .remove(location);
+
+    // Delete the location
+    await this.locationRepository.delete({ id: location.id });
+    return 'Location deleted successfully';
   }
 
   public async createDefaultLocation(device: Device) {
