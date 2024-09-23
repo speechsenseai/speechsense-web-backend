@@ -174,6 +174,7 @@ export class DeviceService {
   public async createDefaultDevice() {
     const device = this.deviceRepository.create();
     device.type = DeviceType.Web;
+    device.name = 'Default Device';
     return await this.deviceRepository.save(device);
   }
   public async findDeviceById(options: {

@@ -68,7 +68,7 @@ export class MetricsService {
   }) {
     const { user, locationId, deviceId, startDate, endDate } = options;
     try {
-      const res = await this.requester.post('/insights', {
+      const res = await this.requester.post('/insights_from_transcript', {
         user_id: user.id,
         location_id: locationId,
         device_id: deviceId,
