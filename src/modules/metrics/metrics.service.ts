@@ -57,7 +57,22 @@ export class MetricsService {
         max_tstamp: endDate,
         min_tstamp: startDate,
       });
-      return res.data;
+      const chartData = res.data.engagement_counts;
+      const labels = [...new Set(chartData.map((item) => item.date))];
+      const types = [...new Set<string>(chartData.map((item) => item.type))];
+      const structuredData = types.reduce<Record<string, number[]>>(
+        (acc, item: string) => {
+          const data = chartData.filter((el) => el.type === item);
+          const dataByType = labels.map((date) => {
+            const found = data.find((el) => el.date === date);
+            return found ? found.count : 0;
+          });
+          acc = { ...acc, [item]: dataByType };
+          return acc;
+        },
+        {},
+      );
+      return { ...res.data, labels, structuredData };
     } catch (error) {
       if (isAxiosError(error)) {
         throw new InternalServerErrorException(error.response?.data);
