@@ -36,13 +36,13 @@ export class LocationController {
     return this.locationService.updateLocation(req.user.user, locationId, body);
   }
 
-  @Delete(':locationId')
-  deleteLocation(@Req() req, @Param('locationId') locationId: string) {
-    return this.locationService.deleteLocationWithS3(req.user.user, locationId);
-  }
-
   @Post()
   createLocation(@Req() req, @Body() body: CreateLocationDto) {
     return this.locationService.createLocation(req.user.user, body);
+  }
+
+  @Delete(':locationId')
+  deleteLocation(@Req() req, @Param('locationId') locationId: string) {
+    return this.locationService.deleteLocationWithS3(req.user.user, locationId);
   }
 }

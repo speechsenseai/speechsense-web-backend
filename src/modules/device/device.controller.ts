@@ -25,13 +25,21 @@ export class DeviceController {
     return this.deviceService.connectDevice(body);
   }
 
+  @Get('one/:deviceId')
+  getOneDevice(@Req() req, @Param('deviceId') deviceId: string) {
+    return this.deviceService.getOneDevice(req.user.sub, deviceId);
+  }
   @Get(':locationId')
   getDevices(
     @Req() req,
     @Paginate() query: PaginateQuery,
     @Param('locationId') locationId: string,
   ) {
-    return this.deviceService.getDevices(req.user.sub, locationId, query);
+    return this.deviceService.getDevicesByLocation(
+      req.user.sub,
+      locationId,
+      query,
+    );
   }
 
   @Put(':deviceId')

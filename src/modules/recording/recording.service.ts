@@ -28,6 +28,82 @@ export class RecordingService {
     private readonly recordingRepository: Repository<Recording>,
   ) {}
   private readonly logger = new Logger(RecordingService.name);
+
+  //CRUD Services Start
+  async getAllRecordings(
+    userId: string,
+    query: PaginateQuery,
+    locationId?: string,
+    deviceId?: string,
+  ) {
+    return paginate(query, this.recordingRepository, {
+      sortableColumns: ['createdAt'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      searchableColumns: ['recordingS3Link'],
+      maxLimit: 10,
+      defaultLimit: 10,
+      where: {
+        device: {
+          ...(deviceId ? { id: deviceId } : {}),
+          location: {
+            ...(locationId ? { id: locationId } : {}),
+            users: {
+              id: userId,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getOneRecording(
+    userId: string,
+    recordingCriteria: string,
+    withDeviceAndLocation?: boolean,
+    useMetricId?: boolean,
+  ) {
+    const record = await this.recordingRepository.findOne({
+      where: {
+        ...(useMetricId
+          ? { metric_id: recordingCriteria }
+          : { id: recordingCriteria }),
+        device: {
+          location: {
+            users: {
+              id: userId,
+            },
+          },
+        },
+      },
+      relations: withDeviceAndLocation ? ['device', 'device.location'] : [],
+    });
+    return record;
+  }
+
+  public async getRecordingsByDevice(
+    userId: string,
+    deviceId: string,
+    query: PaginateQuery,
+  ) {
+    return paginate(query, this.recordingRepository, {
+      sortableColumns: ['createdAt'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      searchableColumns: ['recordingS3Link'],
+      maxLimit: 10,
+      defaultLimit: 10,
+      where: {
+        device: {
+          id: deviceId,
+          location: {
+            users: {
+              id: userId,
+            },
+          },
+        },
+      },
+    });
+  }
+  //Upload Audio from Device and User
   async uploadAudio(user: User, deviceId: string, file: Express.Multer.File) {
     if (!file) throw new BadRequestException('File is required');
     const device = await this.deviceService.findDeviceById({
@@ -83,78 +159,9 @@ export class RecordingService {
     }
     return foundRecording;
   }
-  async getAllRecordings(
-    userId: string,
-    query: PaginateQuery,
-    locationId?: string,
-    deviceId?: string,
-  ) {
-    return paginate(query, this.recordingRepository, {
-      sortableColumns: ['createdAt'],
-      defaultSortBy: [['createdAt', 'DESC']],
-      searchableColumns: ['recordingS3Link'],
-      maxLimit: 10,
-      defaultLimit: 10,
-      where: {
-        device: {
-          ...(deviceId ? { id: deviceId } : {}),
-          location: {
-            ...(locationId ? { id: locationId } : {}),
-            users: {
-              id: userId,
-            },
-          },
-        },
-      },
-    });
-  }
-  public async getRecordings(
-    userId: string,
-    deviceId: string,
-    query: PaginateQuery,
-  ) {
-    return paginate(query, this.recordingRepository, {
-      sortableColumns: ['createdAt'],
-      defaultSortBy: [['createdAt', 'DESC']],
-      searchableColumns: ['recordingS3Link'],
-      maxLimit: 10,
-      defaultLimit: 10,
-      where: {
-        device: {
-          id: deviceId,
-          location: {
-            users: {
-              id: userId,
-            },
-          },
-        },
-      },
-    });
-  }
-  async getOneRecording(
-    userId: string,
-    recordingCriteria: string,
-    withDeviceAndLocation?: boolean,
-    useMetricId?: boolean,
-  ) {
-    const record = await this.recordingRepository.findOne({
-      where: {
-        ...(useMetricId
-          ? { metric_id: recordingCriteria }
-          : { id: recordingCriteria }),
-        device: {
-          location: {
-            users: {
-              id: userId,
-            },
-          },
-        },
-      },
-      relations: withDeviceAndLocation ? ['device', 'device.location'] : [],
-    });
-    return record;
-  }
+  //CRUD Services End
 
+  //Utility Services Start
   async deleteRecordingWithoutDeletingInS3(
     userId: string,
     recordingId: string,
@@ -171,4 +178,5 @@ export class RecordingService {
       throw new InternalServerErrorException(error);
     }
   }
+  //Utility Services End
 }

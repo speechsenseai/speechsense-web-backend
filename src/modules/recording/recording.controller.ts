@@ -50,16 +50,20 @@ export class RecordingController {
     );
   }
   @Get(':deviceId')
-  getRecordings(
+  getRecordingsByDevice(
     @Req() req,
     @Paginate() query: PaginateQuery,
     @Param('deviceId') deviceId: string,
   ) {
-    return this.recordingService.getRecordings(req.user.sub, deviceId, query);
+    return this.recordingService.getRecordingsByDevice(
+      req.user.sub,
+      deviceId,
+      query,
+    );
   }
   @Post('upload-audio/:deviceId')
   @UseInterceptors(FileInterceptor('record'))
-  uploadAudio(
+  uploadAudioFromUser(
     @Req() req,
     @Param('deviceId') deviceId: string,
     @UploadedFile(
@@ -81,7 +85,7 @@ export class RecordingController {
   @Post('upload-audio-device')
   @ForDevice()
   @UseInterceptors(FileInterceptor('record'))
-  uploadAudioDevice(
+  uploadAudioFromDevice(
     @Req() req,
     @UploadedFile(
       new ParseFilePipe({

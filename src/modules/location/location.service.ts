@@ -29,6 +29,7 @@ export class LocationService {
     private readonly deviceService: DeviceService,
     private readonly rabbitMqService: RabbitMqService,
   ) {}
+  //CRUD Services Start
   public async getLocations(userId: string, query: PaginateQuery) {
     return paginate(query, this.locationRepository, {
       sortableColumns: ['name', 'createdAt'],
@@ -44,6 +45,7 @@ export class LocationService {
       },
     });
   }
+
   public async getOneLocation(user: User, locationId: string) {
     return this.locationRepository.findOne({
       where: {
@@ -54,19 +56,7 @@ export class LocationService {
       },
     });
   }
-  public async createLocation(user: User, body: CreateLocationDto) {
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-    const location = this.locationRepository.create(body);
-    location.users = [user];
-    const savedLocation = await this.locationRepository.save(location);
-    await this.createDeviceFolderS3({
-      userUUID: user.id,
-      location,
-    });
-    return savedLocation;
-  }
+
   public async updateLocation(
     user: User,
     locationId: string,
@@ -85,6 +75,20 @@ export class LocationService {
     }
     Object.assign(location, body);
     return this.locationRepository.save(location);
+  }
+
+  public async createLocation(user: User, body: CreateLocationDto) {
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const location = this.locationRepository.create(body);
+    location.users = [user];
+    const savedLocation = await this.locationRepository.save(location);
+    await this.createLocationFolderS3({
+      userUUID: user.id,
+      location,
+    });
+    return savedLocation;
   }
 
   public async deleteLocationWithS3(user: User, locationId: string) {
@@ -174,7 +178,9 @@ export class LocationService {
     await this.locationRepository.delete({ id: location.id });
     return 'Location deleted successfully';
   }
+  //CRUD Services End
 
+  // Utility Services Start
   public async createDefaultLocation(device: Device) {
     const location = this.locationRepository.create();
     location.name = 'My Default Location';
@@ -183,7 +189,7 @@ export class LocationService {
     return await this.locationRepository.save(location);
   }
 
-  public async createDeviceFolderS3(options: {
+  public async createLocationFolderS3(options: {
     userUUID: string;
     location: Location;
   }) {
@@ -201,4 +207,5 @@ export class LocationService {
       );
     }
   }
+  // Utility Services End
 }

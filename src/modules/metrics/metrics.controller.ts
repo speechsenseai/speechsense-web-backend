@@ -1,5 +1,6 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
 import { MetricsService } from './metrics.service';
+import { Response } from 'express';
 
 @Controller('metrics')
 export class MetricsController {
@@ -81,6 +82,24 @@ export class MetricsController {
       use_pagination,
       offset,
       n_lines,
+    });
+  }
+
+  @Get('lines/download')
+  downloadRecordingLines(
+    @Req() req,
+    @Res() res: Response,
+    @Query('locationId') locationId: string,
+    @Query('deviceId') deviceId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.metricsService.downloadRecordingLines(res, {
+      user: req.user.user,
+      locationId,
+      deviceId,
+      startDate,
+      endDate,
     });
   }
 }

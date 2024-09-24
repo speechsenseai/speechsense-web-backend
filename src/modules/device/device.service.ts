@@ -31,7 +31,36 @@ export class DeviceService {
     private readonly jwtService: JwtService,
     private readonly rabbitMqService: RabbitMqService,
   ) {}
-  public async getDevices(
+  //CRUD Services Start
+  public async connectDevice(body: ConnectDeviceDto) {
+    const token = await this.jwtService.signAsync(
+      {
+        uId: body.userId,
+        lId: body.locationId,
+        dId: body.deviceId,
+        isDevice: true,
+      },
+      {
+        secret: process.env.JWT_DEVICE_SECRET,
+      },
+    );
+    return { token };
+  }
+
+  public async getOneDevice(userId: string, deviceId: string) {
+    return this.deviceRepository.findOne({
+      where: {
+        id: deviceId,
+        location: {
+          users: {
+            id: userId,
+          },
+        },
+      },
+    });
+  }
+
+  public async getDevicesByLocation(
     userId: string,
     locationId: string,
     query: PaginateQuery,
@@ -50,29 +79,6 @@ export class DeviceService {
         },
       },
     });
-  }
-  public async createDevice(
-    user: User,
-    locationId: string,
-    body: CreateDeviceDto,
-  ) {
-    const location = await this.locationService.getOneLocation(
-      user,
-      locationId,
-    );
-    if (!location) {
-      throw new BadRequestException('Location not found');
-    }
-    const device = this.deviceRepository.create(body);
-
-    device.location = location;
-    const savedDevice = await this.deviceRepository.save(device);
-    await this.createDeviceFolderS3({
-      userUUID: user.id,
-      locationId,
-      device,
-    });
-    return savedDevice;
   }
 
   public async updateDevice(
@@ -95,6 +101,30 @@ export class DeviceService {
     }
     Object.assign(device, body);
     return this.deviceRepository.save(device);
+  }
+
+  public async createDevice(
+    user: User,
+    locationId: string,
+    body: CreateDeviceDto,
+  ) {
+    const location = await this.locationService.getOneLocation(
+      user,
+      locationId,
+    );
+    if (!location) {
+      throw new BadRequestException('Location not found');
+    }
+    const device = this.deviceRepository.create(body);
+
+    device.location = location;
+    const savedDevice = await this.deviceRepository.save(device);
+    await this.createDeviceFolderS3({
+      userUUID: user.id,
+      locationId,
+      device,
+    });
+    return savedDevice;
   }
 
   public async deleteDeviceWithS3(user: User, deviceId: string) {
@@ -153,7 +183,9 @@ export class DeviceService {
 
     return this.deviceRepository.delete({ id: device.id });
   }
+  //CRUD Services End
 
+  // Utility Services Start
   public async deleteDeviceWithoutDeletingInS3(user: User, deviceId: string) {
     const device = await this.deviceRepository.findOne({
       where: {
@@ -177,36 +209,6 @@ export class DeviceService {
     device.name = 'Default Device';
     return await this.deviceRepository.save(device);
   }
-  public async findDeviceById(options: {
-    id: string;
-    relations?: FindOneOptions<Device>['relations'];
-  }) {
-    const { relations, id } = options;
-
-    const user = await this.deviceRepository.findOne({
-      where: {
-        id,
-      },
-      relations,
-    });
-    return user;
-  }
-
-  public async connectDevice(body: ConnectDeviceDto) {
-    const token = await this.jwtService.signAsync(
-      {
-        uId: body.userId,
-        lId: body.locationId,
-        dId: body.deviceId,
-        isDevice: true,
-      },
-      {
-        secret: process.env.JWT_DEVICE_SECRET,
-      },
-    );
-    return { token };
-  }
-
   public async createDeviceFolderS3(options: {
     userUUID: string;
     locationId: string;
@@ -226,4 +228,19 @@ export class DeviceService {
       );
     }
   }
+  public async findDeviceById(options: {
+    id: string;
+    relations?: FindOneOptions<Device>['relations'];
+  }) {
+    const { relations, id } = options;
+
+    const user = await this.deviceRepository.findOne({
+      where: {
+        id,
+      },
+      relations,
+    });
+    return user;
+  }
+  // Utility Services End
 }
