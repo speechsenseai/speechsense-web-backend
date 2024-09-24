@@ -11,6 +11,11 @@ export class SignUpDto {
   @IsString({ message: 'Name must be a string' })
   @IsNotEmpty({ message: 'Name is required' })
   @ApiProperty()
+  readonly country: string;
+
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name is required' })
+  @ApiProperty()
   readonly name: string;
 
   @IsEmail({}, { message: 'Invalid email format' })

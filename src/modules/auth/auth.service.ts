@@ -37,6 +37,7 @@ export class AuthService {
     const hashPassword = await this.hashString(body.password);
     const profile = await this.profileService.createProfile({
       name: body.name,
+      country: body.country,
     });
     const user = await this.userService.createUser(
       {

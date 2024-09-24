@@ -18,16 +18,16 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Syncs file to ec2
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: Syncs file
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          server: ${{ secrets.SSH_HOST }}
+          host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          local_path: './.'
-          remote_path: '/home/${{ secrets.SSH_USER }}/deployment/speechsense-temp'
-          sftpArgs: '-o ConnectTimeout=5'
-          delete_remote_files: true
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: '22'
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
+            git pull origin master
       - name: 'Create env file'
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -36,7 +36,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: '22'
           script: |
-            cd /home/${{ secrets.SSH_USER }}/deployment/speechsense-temp
+            cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
             touch .env
             echo NODE_ENV=${{ secrets.NODE_ENV }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
@@ -75,10 +75,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: '22'
           script: |
-            cd /home/${{ secrets.SSH_USER }}/deployment/
-            sudo rm -rf speechsense
-            sudo mv speechsense-temp speechsense
-            sudo rm -rf speechsense-temp
             cd /home/${{ secrets.SSH_USER }}/deployment/speechsense
             npm install && npm run build
             cp /home/${{ secrets.SSH_USER }}/deployment/ecosystem.config.js /home/${{ secrets.SSH_USER }}/deployment/speechsense/ecosystem.config.js
