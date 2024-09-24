@@ -9,7 +9,7 @@ export function sanitazeFilname(filename: string, uuid?: string): string {
   const extension = filename.substring(extensionIndex);
 
   // Replace all dots in the filename with underscores
-  const modifiedName = nameWithoutExtension.replace(/(\.|\/|\?)/g, '_');
+  const modifiedName = nameWithoutExtension.replace(/[^a-zA-Z0-9\-_.~]+/g, '_');
 
   // Append "-abc" to the modified filename
   const finalName = `${modifiedName}${uuid ? `-${uuid}` : ''}${extension}`;

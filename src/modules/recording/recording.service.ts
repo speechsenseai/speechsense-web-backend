@@ -40,9 +40,12 @@ export class RecordingService {
     if (!device?.location.id) {
       throw new BadRequestException('Location not found');
     }
-    const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
-    const filename = sanitazeFilname(file.originalname, uuidv4());
+    const decodedFilename = Buffer.from(file.originalname, 'latin1').toString(
+      'utf8',
+    );
+    const filename = sanitazeFilname(decodedFilename, uuidv4());
 
+    const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
     const res = await this.awsS3Servie.uploadFile({
       fileBuffer: file.buffer,
       path: path,
