@@ -6,6 +6,7 @@ import { AwsS3Module } from '@/common/aws-s3/aws-s3.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Recording } from './entities/recording.entity';
 import { RabbitMqModule } from '@/common/rabbitmq/rabbitmq.module';
+import { FfmpegModule } from '@/common/ffmpeg/ffmpeg.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { RabbitMqModule } from '@/common/rabbitmq/rabbitmq.module';
     AwsS3Module,
     TypeOrmModule.forFeature([Recording]),
     RabbitMqModule,
+    FfmpegModule,
   ],
   controllers: [RecordingController],
   providers: [RecordingService],

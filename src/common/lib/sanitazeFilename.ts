@@ -1,4 +1,8 @@
-export function sanitazeFilname(filename: string, uuid?: string): string {
+export function sanitazeFilname(
+  filename: string,
+  uuid?: string,
+  overrideExtension?: string,
+): string {
   // Extract the file extension
   const extensionIndex = filename.lastIndexOf('.');
   if (extensionIndex === -1) {
@@ -6,7 +10,7 @@ export function sanitazeFilname(filename: string, uuid?: string): string {
   }
 
   const nameWithoutExtension = filename.substring(0, extensionIndex);
-  const extension = filename.substring(extensionIndex);
+  const extension = overrideExtension ?? filename.substring(extensionIndex);
 
   // Replace all dots in the filename with underscores
   const modifiedName = nameWithoutExtension.replace(/[^a-zA-Z0-9\-_.~]+/g, '_');

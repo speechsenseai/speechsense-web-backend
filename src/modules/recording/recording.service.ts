@@ -17,12 +17,14 @@ import {
   extractFilenameWithoutExtension,
   sanitazeFilname,
 } from '@/common/lib/sanitazeFilename';
+import { FfmpegService } from '@/common/ffmpeg/ffmpeg.service';
 
 @Injectable()
 export class RecordingService {
   constructor(
     private readonly deviceService: DeviceService,
     private readonly awsS3Servie: AwsS3Service,
+    private readonly ffmpegService: FfmpegService,
     private readonly rabbitMqService: RabbitMqService,
     @InjectRepository(Recording)
     private readonly recordingRepository: Repository<Recording>,
@@ -119,11 +121,17 @@ export class RecordingService {
     const decodedFilename = Buffer.from(file.originalname, 'latin1').toString(
       'utf8',
     );
-    const filename = sanitazeFilname(decodedFilename, uuidv4());
+    //FIX_ME .mp3 is temporary, in the future audio backend will be able to handle multiple audio formats
+    const filename = sanitazeFilname(decodedFilename, uuidv4(), '.mp3');
 
     const path = `/${user.id}/${device?.location.id}/${device?.id}/`;
+    const fileBufferContent = { buffer: file.buffer };
+    if (file.mimetype !== 'audio/mpeg') {
+      const buffer = await this.ffmpegService.convertToMp3(file);
+      fileBufferContent.buffer = buffer;
+    }
     const res = await this.awsS3Servie.uploadFile({
-      fileBuffer: file.buffer,
+      fileBuffer: fileBufferContent.buffer,
       path: path,
       fileName: filename,
       contentType: 'audio/mpeg',
